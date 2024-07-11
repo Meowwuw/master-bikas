@@ -14,9 +14,8 @@ const AdminPanel = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Aquí puedes añadir la lógica para limpiar cualquier estado de autenticación, como tokens, etc.
-    // Por ejemplo:
-    // localStorage.removeItem('authToken');
+    // Lógica para limpiar cualquier estado de autenticación, como tokens, etc.
+
     navigate('/');
   };
 
