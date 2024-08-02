@@ -4,20 +4,37 @@ import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
 import SupervisorPanel from './pages/SupervisorPanel';
 import ClientView from './pages/ClientView';
-import LandingPage from './pages/LandingPage'; // Importa la nueva landing page
+import LandingPage from './pages/LandingPage'; 
+import Services from './pages/Services'; 
+import CourseTopics from './pages/CourseTopics'; 
+import TopicQuestions from './pages/TopicQuestions'; 
+import QuestionDetail from './pages/QuestionDetail'; 
+import Register from './pages/Register'; 
+import SobreNosotros from './pages/SobreNosotros';
+import Contacto from './pages/Contacto'; 
+
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} /> {/* Ruta para la landing page */}
-        <Route path="/login" element={<Login />} /> {/* Ruta para el login */}
+        <Route path="/" element={<LandingPage />} /> 
+        <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/supervisor" element={<SupervisorPanel />} />
         <Route path="/client" element={<ClientView />} />
+        <Route path="/services" element={<Services />} /> 
+        <Route path="/course/:courseName" element={<CourseTopics />} /> 
+        <Route path="/course/:courseName/topic/:topicName" element={<TopicQuestions />} /> 
+        <Route path="/course/:courseName/topic/:topicName/question/:questionName" element={<QuestionDetail />} /> 
+        <Route path="/register" element={<Register />} /> 
+        <Route path="/about" element={<SobreNosotros />} /> 
+        <Route path="/contact" element={<Contacto />} /> 
       </Routes>
     </Router>
   );
 };
 
 export default App;
+
+

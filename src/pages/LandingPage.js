@@ -1,11 +1,18 @@
-import React from 'react';
-import { Container, Typography, AppBar, Toolbar, Button, Box, IconButton, Card, CardContent, Grid, TextField } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Container, Typography, AppBar, Toolbar, Button, Box, IconButton, Card, CardContent, Grid, Fade } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import LoginIcon from '@mui/icons-material/Login';
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import logo from '../assets/images/logo.jpeg';
 import carouselImage1 from '../assets/images/carousel1.jpg';
 import carouselImage2 from '../assets/images/carousel2.jpg';
 import carouselImage3 from '../assets/images/carousel3.jpg';
+import clientLogo1 from '../assets/images/client1.png';
+import clientLogo2 from '../assets/images/client2.jpg';
+import clientLogo3 from '../assets/images/client3.png';
+import clientLogo4 from '../assets/images/client4.jpg';
+import Publicidad from './Publicidad';
 
 const testimonials = [
   {
@@ -55,6 +62,13 @@ const services = [
   }
 ];
 
+const clients = [
+  { name: 'Colegio A', logo: clientLogo1 },
+  { name: 'Colegio B', logo: clientLogo2 },
+  { name: 'Colegio C', logo: clientLogo3 },
+  { name: 'Colegio D', logo: clientLogo4 },
+];
+
 const LandingPage = () => {
   return (
     <Box sx={{ bgcolor: '#FEFEFE', minHeight: '100vh' }}>
@@ -66,9 +80,9 @@ const LandingPage = () => {
           </Typography>
           <nav>
             <Button color="inherit" sx={{ fontWeight: 'bold', color: '#FEFEFE' }}>Inicio</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }}>Servicios</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }}>Sobre Nosotros</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }}>Contacto</Button>
+            <Button component={Link}  to="/services" color="inherit" sx={{ color: '#FEFEFE' }}>Servicios</Button>
+            <Button component={Link}  to="/about" color="inherit" sx={{ color: '#FEFEFE' }}>Sobre Nosotros</Button>
+            <Button component={Link}  to="/contact" color="inherit" sx={{ color: '#FEFEFE' }}>Contacto</Button>
           </nav>
           <IconButton color="inherit">
             <LoginIcon sx={{ color: '#FEFEFE' }} />
@@ -90,6 +104,7 @@ const LandingPage = () => {
       </Box>
 
       <Container maxWidth="lg" sx={{ p: 0 }}>
+
         <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Typography variant="h4" sx={{ mb: 4, color: '#1E494F' }}>
             Nuestros Servicios
@@ -111,18 +126,12 @@ const LandingPage = () => {
             ))}
           </Grid>
         </Box>
+        
+        </Container>
 
-        <Box sx={{mt: 7, textAlign: 'center', bgcolor: '#1E494F', color: '#FEFEFE', p: 4 }}>
-          <Typography variant="h4" sx={{ mb: 2 }}>
-            Sobre Nosotros
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            MasterBikas es un proveedor líder de apoyo y recursos en matemáticas para colegios y estudiantes. Nuestra misión es empoderar a los estudiantes de todas las edades para que sobresalgan en matemáticas a través de contenido interactivo, atractivo y accesible.
-          </Typography>
-          <Button variant="contained" sx={{ bgcolor: '#306D90', '&:hover': { bgcolor: '#000000' } }}>
-            Aprende Más
-          </Button>
-        </Box>
+        <Publicidad/>
+
+        <Container maxWidth="lg" sx={{ p: 0 }}>
 
         <Box sx={{ mt: 4 }}>
           <Typography variant="h4" sx={{ mb: 4, textAlign: 'center', color: '#1E494F' }}>
@@ -146,39 +155,30 @@ const LandingPage = () => {
           </Grid>
         </Box>
 
-        <Box sx={{ mt: 8, textAlign: 'center', bgcolor: '#306D90', color: '#FEFEFE', p: 4 }}>
+        <Box sx={{ mt: 8, textAlign: 'center', color: '#306D90', p: 4 }}>
           <Typography variant="h4" sx={{ mb: 2 }}>
-            ¡Empieza hoy mismo!
+            Clientes o Mercado
           </Typography>
-          <Button variant="contained" sx={{ bgcolor: '#1E494F', '&:hover': { bgcolor: '#000000' } }}>
-            Inscríbete ahora
-          </Button>
+          <Grid container spacing={4}>
+            {clients.map((client, index) => (
+              <Grid item xs={6} sm={3} key={index}>
+                <Box sx={{
+                  textAlign: 'center',
+                  '&:hover': {
+                    filter: 'none',
+                    transition: 'filter 0.3s',
+                  },
+                  filter: 'grayscale(100%)',
+                  transition: 'filter 0.3s'
+                }}>
+                  <img src={client.logo} alt={client.name} style={{ maxWidth: '100px', marginBottom: '8px' }} />
+                  <Typography variant="body1">{client.name}</Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
 
-        <Box sx={{ mt: 8, textAlign: 'center', bgcolor: '#FEFEFE', color: '#1E494F', p: 4 }}>
-          <Typography variant="h4" sx={{ mb: 2 }}>
-            Contáctanos
-          </Typography>
-          
-          <form>
-            <Grid container spacing={2} justifyContent="center">
-              <Grid item xs={12} md={6}>
-                <TextField label="Nombre" variant="outlined" fullWidth required />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField label="Correo Electrónico" variant="outlined" fullWidth required />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField label="Mensaje" variant="outlined" fullWidth multiline rows={4} required />
-              </Grid>
-              <Grid item xs={12}>
-                <Button variant="contained" sx={{ bgcolor: '#1E494F', '&:hover': { bgcolor: '#000000' } }}>
-                  Enviar
-                </Button>
-              </Grid>
-            </Grid>
-          </form>
-        </Box>
       </Container>
 
       <Box sx={{ bgcolor: '#1E494F', color: '#FEFEFE', textAlign: 'center', p: 2, mt: 4 }}>

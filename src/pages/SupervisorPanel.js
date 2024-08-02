@@ -35,7 +35,7 @@ const SupervisorPanel = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <AppBar position="static" sx={{ backgroundColor: '#5BE2E6' }}>
+      <AppBar position="static" sx={{ backgroundColor: '#1E494F' }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold', color: '#FCFBFC' }}>
             Supervisor Panel
