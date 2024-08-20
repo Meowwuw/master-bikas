@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Typography, AppBar, Toolbar, Button, Box, IconButton, Card, CardContent, Grid, Fade } from '@mui/material';
+import { Container, Typography, AppBar, Toolbar, Button, Box, IconButton, Card, CardContent, Grid } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
 import LoginIcon from '@mui/icons-material/Login';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import logo from '../assets/images/logo.jpeg';
 import carouselImage1 from '../assets/images/carousel1.jpg';
 import carouselImage2 from '../assets/images/carousel2.jpg';
@@ -63,13 +62,22 @@ const services = [
 ];
 
 const clients = [
-  { name: 'Colegio A', logo: clientLogo1 },
-  { name: 'Colegio B', logo: clientLogo2 },
-  { name: 'Colegio C', logo: clientLogo3 },
-  { name: 'Colegio D', logo: clientLogo4 },
+  { name: 'Colegio Nacional', logo: clientLogo1 },
+  { name: 'Colegio Particular', logo: clientLogo2 },
+  { name: 'Universidad', logo: clientLogo3 },
+  { name: 'Instituto', logo: clientLogo4 },
 ];
 
 const LandingPage = () => {
+
+  const [ads, setAds] = useState(() => {
+    const storedAds = JSON.parse(localStorage.getItem('ads'));
+    return storedAds || [
+      { title: "Demian the Rat", description: "Se presenta en shows que mezclan humor y anécdotas...", image: "phoneImage" },
+      { title: "Wendy Ramos", description: "Wendy Ramos es una actriz, clown y conferencista peruana...", image: "phoneImage2" }
+    ];
+  });
+  
   return (
     <Box sx={{ bgcolor: '#FEFEFE', minHeight: '100vh' }}>
       <AppBar position="static" sx={{ bgcolor: '#1E494F' }}>
@@ -129,7 +137,7 @@ const LandingPage = () => {
         
         </Container>
 
-        <Publicidad/>
+        <Publicidad ads={ads} />
 
         <Container maxWidth="lg" sx={{ p: 0 }}>
 

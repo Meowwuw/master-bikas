@@ -21,7 +21,7 @@ const AdminPanel = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen">
-      <AppBar position="static" sx={{ backgroundColor: '#5BE2E6' }}>
+      <AppBar position="static" sx={{ backgroundColor: '#1E494F' }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold', color: '#FCFBFC' }}>
             Admin Panel
@@ -33,6 +33,7 @@ const AdminPanel = () => {
             <Button color="inherit" sx={{ color: '#FCFBFC' }}>Temas</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }}>Supervisores</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }}>Problemas</Button>
+            <Button color="inherit" sx={{ color: '#FCFBFC' }} onClick={() => navigate('/admin/publicidad')}>Publicidad</Button>
           </nav>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ position: 'relative' }}>

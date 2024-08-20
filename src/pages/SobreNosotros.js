@@ -13,7 +13,7 @@ const SobreNosotros = () => {
   };
 
   return (
-    <Box sx={{ bgcolor: '#FEFEFE', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#FEFEFE' }}>
       <AppBar position="static" sx={{ bgcolor: '#1E494F' }}>
         <Toolbar>
           <img src={logo} alt="Logo" style={{ marginRight: 20, width: '50px', height: '50px' }} />
@@ -31,10 +31,9 @@ const SobreNosotros = () => {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ flex: 1 }}>
         <Box sx={{ my: 4 }}>
           <Tabs value={value} onChange={handleChange} centered>
-
             <Tab label="NUESTROS VALORES" />
             <Tab label="NUESTRA VISIÓN" />
             <Tab label="NUESTRA HISTORIA" />
@@ -57,7 +56,6 @@ const SobreNosotros = () => {
             </Typography>
             <Typography variant="body1" gutterBottom>
               La visión de MasterBikas ha permanecido igual desde el primer día. A través de nuestra plataforma de educación segura, MasterBikas está cambiando la forma en que las personas aprenden y trabajan, creando un mundo más seguro y conectado. Transformamos el aprendizaje en una experiencia fluida y accesible para todos.
-
             </Typography>
             <Box sx={{ textAlign: 'center', my: 4 }}>
               <img src="https://images.pexels.com/photos/15543048/pexels-photo-15543048/free-photo-of-creativo-respeto-respetar-pasion.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Nuestros Valores" style={{ width: '100%', maxHeight: '400px', objectFit: 'cover' }} />
@@ -76,13 +74,11 @@ const SobreNosotros = () => {
           </TabPanel>
         </Box>
       </Container>
-
-      <Box sx={{ bgcolor: '#1E494F', color: '#FEFEFE', textAlign: 'center', p: 2, mt: 13 }}>
+      <Box sx={{ bgcolor: '#1E494F', color: '#FEFEFE', textAlign: 'center', p: 2, mt: 'auto' }}>
         <Typography variant="body2">
           © 2024 MasterBikas. Todos los derechos reservados.
         </Typography>
       </Box>
-
     </Box>
   );
 };

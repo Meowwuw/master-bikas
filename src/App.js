@@ -12,7 +12,8 @@ import QuestionDetail from './pages/QuestionDetail';
 import Register from './pages/Register'; 
 import SobreNosotros from './pages/SobreNosotros';
 import Contacto from './pages/Contacto'; 
-
+import PublicidadConfig from './pages/PublicidadConfig'; 
+import PagoYape from './pages/PagoYape';
 
 const App = () => {
   return (
@@ -30,11 +31,11 @@ const App = () => {
         <Route path="/register" element={<Register />} /> 
         <Route path="/about" element={<SobreNosotros />} /> 
         <Route path="/contact" element={<Contacto />} /> 
+        <Route path="/admin/publicidad" element={<PublicidadConfig />} />
+        <Route path="/pago" element={<PagoYape />} />
       </Routes>
     </Router>
   );
 };
 
 export default App;
-
-
