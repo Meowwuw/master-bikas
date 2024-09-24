@@ -14,6 +14,11 @@ import SobreNosotros from './pages/SobreNosotros';
 import Contacto from './pages/Contacto'; 
 import PublicidadConfig from './pages/PublicidadConfig'; 
 import PagoYape from './pages/PagoYape';
+import VerifyEmail from './pages/VerifyEmail';
+import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
+import UserProfile from './pages/UserProfile';
+import Podium from './pages/Podium';
 
 const App = () => {
   return (
@@ -33,6 +38,11 @@ const App = () => {
         <Route path="/contact" element={<Contacto />} /> 
         <Route path="/admin/publicidad" element={<PublicidadConfig />} />
         <Route path="/pago" element={<PagoYape />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/reset-password" element={<ResetPassword/>} />
+        <Route path="/forgot-password" element={<ForgotPassword/>} />
+        <Route path="/user-profile" element={<UserProfile/>} />
+        <Route path="/podium" element={<Podium/>} />
       </Routes>
     </Router>
   );

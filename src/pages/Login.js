@@ -6,8 +6,13 @@ import logo from '../assets/images/logo.jpeg';
 import img1 from '../assets/images/login1.png';
 import img2 from '../assets/images/login2.png';
 import img3 from '../assets/images/login3.png';
-import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+
+
+
 
 const images = [img1, img2, img3];
 
@@ -26,18 +31,35 @@ const Login = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email === "admin@example.com" && password === "adminpassword") {
-      navigate('/admin');
-    } else if (email === "supervisor@example.com" && password === "supervisorpassword") {
-      navigate('/supervisor');
-    } else if (email === "usuario@example.com" && password === "usuariopassword") {
-      navigate('/client');
-    } else {
-      setError("Correo electrónico o contraseña incorrectos");
+    setError(''); // Resetea el mensaje de error
+  
+    try {
+      const response = await axios.post('http://localhost:5000/api/users/login', {
+        email,
+        password,
+      });
+  
+      // Maneja la respuesta exitosa
+      if (response.status === 200) {
+        console.log('Login exitoso:', response.data);
+        localStorage.setItem('token', response.data.token); // Guardar el token JWT
+        localStorage.setItem('username', response.data.username); // Guardar el username
+        navigate('/'); // Redirigir al dashboard o a la página principal
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setError(error.response.data.error);
+      } else {
+        setError('Error al iniciar sesión. Por favor, inténtalo de nuevo.');
+      }
     }
   };
+  
+  
+  
+
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', flexDirection: isMobile ? 'column' : 'row' }}>
@@ -100,7 +122,11 @@ const Login = () => {
             Iniciar sesión
           </Button>
         </Box>
-        <Link href="#" underline="hover" sx={{ mt: 2, color: 'gray' }}>
+        <Link href="/register" underline="hover" sx={{ mt: 2, color: 'gray' }}>
+          ¿No tienes cuenta? Regístrate
+        </Link>
+
+        <Link href="/forgot-password" underline="hover" sx={{ mt: 2, color: 'gray' }}>
           Olvidé mi contraseña
         </Link>
       </Container>

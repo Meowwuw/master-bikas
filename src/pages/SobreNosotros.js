@@ -5,6 +5,24 @@ import { useState } from 'react';
 import LoginIcon from '@mui/icons-material/Login';
 import logo from '../assets/images/logo.jpeg';
 
+const teamMembers = [
+  {
+    name: 'Doris Tito',
+    job: 'Project Manager',
+    photo: require('../assets/images/testimonio1.jpg'),
+  },
+  {
+    name: 'Denisse Rodríguez',
+    job: 'Desarrolladora Frontend',
+    photo: require('../assets/images/testimonio1.jpg'),
+  },
+  {
+    name: 'Carlos Gómez',
+    job: 'Ingeniero de Software',
+    photo: require('../assets/images/testimonio1.jpg'),
+  }
+];
+
 const SobreNosotros = () => {
   const [value, setValue] = useState(0);
 
@@ -37,6 +55,7 @@ const SobreNosotros = () => {
             <Tab label="NUESTROS VALORES" />
             <Tab label="NUESTRA VISIÓN" />
             <Tab label="NUESTRA HISTORIA" />
+            <Tab label="NUESTRO EQUIPO" />
           </Tabs>
           <Divider sx={{ my: 2 }} />
           <TabPanel value={value} index={0}>
@@ -63,13 +82,31 @@ const SobreNosotros = () => {
           </TabPanel>
           <TabPanel value={value} index={2}>
             <Typography variant="h4" gutterBottom>
-              Nuestra Red
+              Nuestra Historia
             </Typography>
             <Typography variant="body1" gutterBottom>
               MasterBikas ha construido una red robusta y global de estudiantes, educadores y profesionales que están comprometidos con el aprendizaje continuo. Nuestra red nos permite ofrecer experiencias educativas enriquecedoras y apoyar a nuestros estudiantes en cada paso de su viaje educativo.
             </Typography>
             <Box sx={{ textAlign: 'center', my: 4 }}>
               <img src="https://images.pexels.com/photos/4365443/pexels-photo-4365443.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Nuestra Red" style={{ width: '100%', maxHeight: '400px', objectFit: 'cover' }} />
+            </Box>
+          </TabPanel>
+          <TabPanel value={value} index={3}>
+            <Typography variant="h4" gutterBottom>
+              Nuestro Equipo
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap' }}>
+              {teamMembers.map((member, index) => (
+                <Box key={index} sx={{ textAlign: 'center', maxWidth: '200px', mb: 4 }}>
+                  <img src={member.photo} alt={member.name} style={{ width: '150px', height: '150px', borderRadius: '50%', objectFit: 'cover' }} />
+                  <Typography variant="h6" sx={{ mt: 2 }}>
+                    {member.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {member.job}
+                  </Typography>
+                </Box>
+              ))}
             </Box>
           </TabPanel>
         </Box>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Container, Box, InputBase, IconButton, Card, CardHeader, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { AppBar, Toolbar, Typography, Button, Container, TextField, Box, InputBase, IconButton, Card, CardHeader, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PeopleIcon from '@mui/icons-material/People';
@@ -9,9 +9,51 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const AdminPanel = () => {
   const navigate = useNavigate();
+  const [payments, setPayments] = useState([]);
+  const [editPaymentId, setEditPaymentId] = useState(null);
+  const [editStatus, setEditStatus] = useState('');
+  const [editAmount, setEditAmount] = useState('');
+
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  const fetchPayments = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/admin/payments');
+      setPayments(response.data);
+    } catch (error) {
+      console.error('Error al obtener los pagos:', error);
+    }
+  };
+
+  const handleEditClick = (payment) => {
+    setEditPaymentId(payment.id);
+    setEditStatus(payment.status);
+    setEditAmount(payment.amount);
+  };
+
+  const handleSaveClick = async (id) => {
+    try {
+      await axios.post('http://localhost:5000/api/admin/update-payment', {
+        id,
+        status: editStatus,
+        amount: editAmount
+      });
+      setEditPaymentId(null);
+      fetchPayments();  // Refresh payments after update
+    } catch (error) {
+      console.error('Error al actualizar el pago:', error);
+    }
+  };
+
+  const handleCancelClick = () => {
+    setEditPaymentId(null);
+  };
 
   const handleLogout = () => {
     // Lógica para limpiar cualquier estado de autenticación, como tokens, etc.
@@ -124,55 +166,65 @@ const AdminPanel = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell>ID</TableCell>
-                      <TableCell>Nombre</TableCell>
                       <TableCell>Email</TableCell>
-                      <TableCell>Rol</TableCell>
+                      <TableCell>Estado</TableCell>
+                      <TableCell>Monto</TableCell>
                       <TableCell align="right">Acciones</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    <TableRow>
-                      <TableCell>1</TableCell>
-                      <TableCell>John Doe</TableCell>
-                      <TableCell>john@example.com</TableCell>
-                      <TableCell>Admin</TableCell>
-                      <TableCell align="right">
-                        <IconButton size="small">
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton size="small">
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>2</TableCell>
-                      <TableCell>Jane Smith</TableCell>
-                      <TableCell>jane@example.com</TableCell>
-                      <TableCell>User</TableCell>
-                      <TableCell align="right">
-                        <IconButton size="small">
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton size="small">
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>3</TableCell>
-                      <TableCell>Bob Johnson</TableCell>
-                      <TableCell>bob@example.com</TableCell>
-                      <TableCell>User</TableCell>
-                      <TableCell align="right">
-                        <IconButton size="small">
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton size="small">
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
+                    {payments.map((payment) => (
+                      <TableRow key={payment.id}>
+                        <TableCell>{payment.id}</TableCell>
+                        <TableCell>{payment.email}</TableCell>
+                        <TableCell>
+                          {editPaymentId === payment.id ? (
+                            <TextField
+                              value={editStatus}
+                              onChange={(e) => setEditStatus(e.target.value)}
+                              select
+                              SelectProps={{ native: true }}
+                            >
+                              <option value="pendiente">Pendiente</option>
+                              <option value="confirmado">Confirmado</option>
+                            </TextField>
+                          ) : (
+                            payment.status
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editPaymentId === payment.id ? (
+                            <TextField
+                              value={editAmount}
+                              onChange={(e) => setEditAmount(e.target.value)}
+                              type="number"
+                            />
+                          ) : (
+                            payment.amount !== null && payment.amount !== undefined
+                              ? parseFloat(payment.amount).toFixed(2)
+                              : 'N/A' // o cualquier mensaje predeterminado que quieras mostrar si el monto no está definido
+                          )}
+                        </TableCell>
+
+                        <TableCell align="right">
+                          {editPaymentId === payment.id ? (
+                            <>
+                              <Button onClick={() => handleSaveClick(payment.id)}>Guardar</Button>
+                              <Button onClick={handleCancelClick}>Cancelar</Button>
+                            </>
+                          ) : (
+                            <>
+                              <IconButton size="small" onClick={() => handleEditClick(payment)}>
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton size="small">
+                                <DeleteIcon />
+                              </IconButton>
+                            </>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </TableContainer>

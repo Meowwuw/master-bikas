@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Container, Typography, Grid, Card, CardContent, CardActions, Button, Box, AppBar, Toolbar, IconButton, TextField } from '@mui/material';
-import LoginIcon from '@mui/icons-material/Login';
 import Autocomplete from '@mui/material/Autocomplete';
 import logo from '../assets/images/logo.jpeg';
 import geometryImage from '../assets/images/geometry.gif';
@@ -11,7 +10,9 @@ import trigonometryImage from '../assets/images/trigonometry.jpg';
 import chemistryImage from '../assets/images/chemistry.gif';
 import physicsImage from '../assets/images/physics.png';
 import excelImage from '../assets/images/excel.gif';
-
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import axios
+ from 'axios';
 // Mock data for courses
 const allCourses = [
   { name: 'Geometría', description: 'Aprende conceptos geométricos', image: geometryImage },
@@ -50,6 +51,27 @@ const Services = () => {
     navigate(`/course/${course.name}`);
   };
 
+  const handleLogout = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/logout', {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 200) {
+        console.log('Cierre de sesión exitoso');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error al cerrar sesión', error);
+    }
+  };
+
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppBar position="static" sx={{ bgcolor: '#1E494F' }}>
@@ -64,8 +86,8 @@ const Services = () => {
             <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/about">Sobre Nosotros</Button>
             <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/contact">Contacto</Button>
           </nav>
-          <IconButton color="inherit">
-            <LoginIcon sx={{ color: '#FEFEFE' }} />
+          <IconButton color="inherit" onClick={handleLogout}>
+            <ExitToAppIcon sx={{ color: '#FEFEFE' }} />
           </IconButton>
         </Toolbar>
       </AppBar>

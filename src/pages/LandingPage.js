@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Container, Typography, AppBar, Toolbar, Button, Box, IconButton, Card, CardContent, Grid } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Container, Typography, AppBar, Toolbar, Button, Box, IconButton, Card, CardContent, Grid, Menu, MenuItem, Avatar } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
-import LoginIcon from '@mui/icons-material/Login';
 import logo from '../assets/images/logo.jpeg';
+import osoIcon from '../assets/images/oso.png';
+
 import carouselImage1 from '../assets/images/carousel1.jpg';
 import carouselImage2 from '../assets/images/carousel2.jpg';
 import carouselImage3 from '../assets/images/carousel3.jpg';
@@ -12,21 +13,30 @@ import clientLogo2 from '../assets/images/client2.jpg';
 import clientLogo3 from '../assets/images/client3.png';
 import clientLogo4 from '../assets/images/client4.jpg';
 import Publicidad from './Publicidad';
+import Podium from './Podium';
 
+import axios from 'axios';
 const testimonials = [
   {
-    text: "MasterBikas me ayudó a mejorar mis notas en matemáticas. Sus videos explicativos son geniales.",
-    author: "Juan Pérez, Estudiante"
+    name: "Doris Tito",
+    job: "Project Manager - Fandango antes Cinepapaya",
+    text: "Tengo un equipo magnífico y mis funciones involucran el rol de Scrum Master; por eso opté por certificarme en GESAP, así mismo su lista de temas me convenció y estoy muy contenta.",
+    photo: require('../assets/images/testimonio1.jpg'),
   },
   {
-    text: "Gracias a MasterBikas, nuestros estudiantes están más comprometidos y entienden mejor las matemáticas.",
-    author: "Ana Gómez, Profesora"
+    name: "Denisse Rodríguez",
+    job: "Project Manager - DNS del Perú",
+    text: "Decidí llevar un curso porque es un plus para mi carrera y elegí a GESAP para certificarme por buenas referencias de amigos. Me ayudó a entender los temas.",
+    photo: require('../assets/images/testimonio2.jpg'),
   },
   {
-    text: "La plataforma de MasterBikas es muy intuitiva y fácil de usar. Mis hijos han mejorado mucho en sus estudios.",
-    author: "Carlos Rivera, Padre de familia"
-  }
+    name: "Iris Fernández Tinco",
+    job: "Ingeniera Civil y Jefe de Proyecto - NEXCOM S.A.C.",
+    text: "Un amigo Scrum Master me recomendó certificarme en GESAP. La clase me ha parecido espectacular, porque no solo escuchas, sino que construyes, creas y aplicas la teoría aprendida.",
+    photo: require('../assets/images/testimonio3.jpg'),
+  },
 ];
+
 
 const carouselItems = [
   {
@@ -70,14 +80,80 @@ const clients = [
 
 const LandingPage = () => {
 
-  const [ads, setAds] = useState(() => {
+  const [username, setUsername] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null); // Estado para el menú desplegable
+  const navigate = useNavigate();
+  const [points, setPoints] = useState(0); // Estado para los puntos
+
+
+
+  const [ads] = useState(() => {
     const storedAds = JSON.parse(localStorage.getItem('ads'));
     return storedAds || [
       { title: "Demian the Rat", description: "Se presenta en shows que mezclan humor y anécdotas...", image: "phoneImage" },
       { title: "Wendy Ramos", description: "Wendy Ramos es una actriz, clown y conferencista peruana...", image: "phoneImage2" }
     ];
   });
-  
+
+  useEffect(() => {
+    const storedUsername = localStorage.getItem('username');
+    const storedToken = localStorage.getItem('token');
+
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+
+    // Obtener los puntos del usuario desde la API
+    const fetchPoints = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/users/points', {
+          headers: {
+            'Authorization': `Bearer ${storedToken}`,
+          },
+        });
+        setPoints(response.data.points); // Asignar los puntos obtenidos
+      } catch (error) {
+        console.error('Error al obtener los puntos:', error);
+      }
+    };
+
+    if (storedToken) {
+      fetchPoints(); // Llamada a la API para obtener los puntos
+    }
+  }, []);
+
+
+  const handleLogout = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/logout', {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.status === 200) {
+        console.log('Cierre de sesión exitoso');
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error al cerrar sesión', error);
+    }
+  };
+
+  // Funciones para manejar la apertura y cierre del menú
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+
+
   return (
     <Box sx={{ bgcolor: '#FEFEFE', minHeight: '100vh' }}>
       <AppBar position="static" sx={{ bgcolor: '#1E494F' }}>
@@ -87,14 +163,40 @@ const LandingPage = () => {
             MasterBikas
           </Typography>
           <nav>
-            <Button color="inherit" sx={{ fontWeight: 'bold', color: '#FEFEFE' }}>Inicio</Button>
-            <Button component={Link}  to="/services" color="inherit" sx={{ color: '#FEFEFE' }}>Servicios</Button>
-            <Button component={Link}  to="/about" color="inherit" sx={{ color: '#FEFEFE' }}>Sobre Nosotros</Button>
-            <Button component={Link}  to="/contact" color="inherit" sx={{ color: '#FEFEFE' }}>Contacto</Button>
+            <Button color="inherit" sx={{ fontWeight: 'bold', color: '#FEFEFE' }} component={Link} to="/">Inicio</Button>
+            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/services">Servicios</Button>
+            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/about">Sobre Nosotros</Button>
+            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/contact">Contacto</Button>
           </nav>
-          <IconButton color="inherit">
-            <LoginIcon sx={{ color: '#FEFEFE' }} />
-          </IconButton>
+
+          {username ? (
+            <>
+              <Typography sx={{ color: '#FEFEFE', marginRight: '10px' }}>
+                Hola {username}
+              </Typography>
+              {/* Ícono del oso y puntos */}
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <IconButton onClick={handleMenuClick}>
+                  <Avatar src={osoIcon} alt="Oso" />
+                </IconButton>
+                <Typography sx={{ color: '#FEFEFE', marginLeft: '8px' }}>
+                  {points} pts
+                </Typography>
+              </Box>
+              {/* Menú desplegable */}
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={() => navigate('/user-profile')}>Mi Perfil</MenuItem>
+                <MenuItem onClick={() => navigate('/puntos')}>Mis Puntos</MenuItem>
+                <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Button color="inherit" component={Link} to="/login" sx={{ color: '#FEFEFE' }}>INICIAR SESIÓN</Button>
+          )}
         </Toolbar>
       </AppBar>
 
@@ -134,12 +236,12 @@ const LandingPage = () => {
             ))}
           </Grid>
         </Box>
-        
-        </Container>
 
-        <Publicidad ads={ads} />
+      </Container>
 
-        <Container maxWidth="lg" sx={{ p: 0 }}>
+      <Publicidad ads={ads} />
+
+      <Container maxWidth="lg" sx={{ p: 0 }}>
 
         <Box sx={{ mt: 4 }}>
           <Typography variant="h4" sx={{ mb: 4, textAlign: 'center', color: '#1E494F' }}>
@@ -150,41 +252,34 @@ const LandingPage = () => {
               <Grid item xs={12} md={4} key={index}>
                 <Card>
                   <CardContent>
-                    <Typography variant="body1" color="textSecondary" component="p">
-                      "{testimonial.text}"
+                    {/* Ajustar la posición de la imagen */}
+                    <img
+                      src={testimonial.photo}
+                      alt={testimonial.name}
+                      style={{ width: '100%', height: '300px', objectFit: 'cover', objectPosition: 'top' }}
+                    />
+                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold', color: '#1E494F' }}>
+                      {testimonial.name.toUpperCase()}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary" component="p" sx={{ textAlign: 'right', mt: 2 }}>
-                      - {testimonial.author}
+                    <Typography variant="subtitle1" sx={{ color: '#666' }}>
+                      {testimonial.job}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {testimonial.text}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
             ))}
           </Grid>
+
+
+
         </Box>
 
+
         <Box sx={{ mt: 8, textAlign: 'center', color: '#306D90', p: 4 }}>
-          <Typography variant="h4" sx={{ mb: 2 }}>
-            Clientes o Mercado
-          </Typography>
-          <Grid container spacing={4}>
-            {clients.map((client, index) => (
-              <Grid item xs={6} sm={3} key={index}>
-                <Box sx={{
-                  textAlign: 'center',
-                  '&:hover': {
-                    filter: 'none',
-                    transition: 'filter 0.3s',
-                  },
-                  filter: 'grayscale(100%)',
-                  transition: 'filter 0.3s'
-                }}>
-                  <img src={client.logo} alt={client.name} style={{ maxWidth: '100px', marginBottom: '8px' }} />
-                  <Typography variant="body1">{client.name}</Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
+          <Podium />
         </Box>
 
       </Container>
