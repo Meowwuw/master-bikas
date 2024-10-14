@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Container, TextField, Button, Typography, Box, Link } from '@mui/material';
+import ReCAPTCHA from "react-google-recaptcha";
 import logo from '../assets/images/logo.jpeg';
 import img1 from '../assets/images/login1.png';
 import img2 from '../assets/images/login2.png';
@@ -9,10 +10,6 @@ import img3 from '../assets/images/login3.png';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-
-
-
 
 const images = [img1, img2, img3];
 
@@ -20,6 +17,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState('');
   const [currentImage, setCurrentImage] = useState(0);
   const navigate = useNavigate();
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -33,20 +31,19 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Resetea el mensaje de error
+    setError('');
   
     try {
       const response = await axios.post('http://localhost:5000/api/users/login', {
         email,
         password,
+        recaptchaToken,  // Aquí se envía el token
       });
   
-      // Maneja la respuesta exitosa
       if (response.status === 200) {
-        console.log('Login exitoso:', response.data);
-        localStorage.setItem('token', response.data.token); // Guardar el token JWT
-        localStorage.setItem('username', response.data.username); // Guardar el username
-        navigate('/'); // Redirigir al dashboard o a la página principal
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('username', response.data.username);
+        navigate('/');
       }
     } catch (error) {
       if (error.response && error.response.data) {
@@ -57,10 +54,11 @@ const Login = () => {
     }
   };
   
+  const onReCAPTCHAChange = (token) => {
+    console.log('reCAPTCHA token:', token);
+    setRecaptchaToken(token);
+  };
   
-  
-
-
   return (
     <Box sx={{ display: 'flex', height: '100vh', flexDirection: isMobile ? 'column' : 'row' }}>
       {!isMobile && (
@@ -113,11 +111,17 @@ const Login = () => {
             margin="normal"
             variant="outlined"
           />
+          <ReCAPTCHA
+            sitekey="6LfDMlYqAAAAAIL7d5D3kFZDhzW9_Ce-JRcF6LQB"
+            onChange={onReCAPTCHAChange}
+          />
+
           <Button
             fullWidth
             type="submit"
             variant="contained"
             sx={{ mt: 2, bgcolor: '#63D9DE', '&:hover': { bgcolor: '#4bb4b8' } }}
+            disabled={!recaptchaToken}
           >
             Iniciar sesión
           </Button>

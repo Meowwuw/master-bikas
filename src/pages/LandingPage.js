@@ -1,21 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Container, Typography, AppBar, Toolbar, Button, Box, IconButton, Card, CardContent, Grid, Menu, MenuItem, Avatar } from '@mui/material';
+import React, { useState} from 'react';
+import { Container, Typography, Box, Grid, Card, CardContent } from '@mui/material';
 import Carousel from 'react-material-ui-carousel';
-import logo from '../assets/images/logo.jpeg';
-import osoIcon from '../assets/images/oso.png';
-
-import carouselImage1 from '../assets/images/carousel1.jpg';
-import carouselImage2 from '../assets/images/carousel2.jpg';
-import carouselImage3 from '../assets/images/carousel3.jpg';
-import clientLogo1 from '../assets/images/client1.png';
-import clientLogo2 from '../assets/images/client2.jpg';
-import clientLogo3 from '../assets/images/client3.png';
-import clientLogo4 from '../assets/images/client4.jpg';
 import Publicidad from './Publicidad';
 import Podium from './Podium';
+import Navbar from './Navbar'; 
+import carouselImage1 from '../assets/images/action.png';
+import carouselImage2 from '../assets/images/carousel2.jpg';
+import carouselImage3 from '../assets/images/carousel3.jpg';
 
-import axios from 'axios';
+const carouselItems = [
+  { image: carouselImage1 },
+  { image: carouselImage2, text: "Apoyo personalizado" },
+  { image: carouselImage3, text: "Resultados garantizados" }
+];
+
+const services = [
+  {
+    title: "Tutoría de Matemáticas",
+    description: "Nuestros tutores expertos brindan apoyo personalizado para ayudar a los estudiantes a sobresalir en matemáticas.",
+    icon: "📘"
+  },
+  {
+    title: "Videos de Matemáticas",
+    description: "Videos de matemáticas interactivos y atractivos para ayudar a los estudiantes a entender conceptos complejos.",
+    icon: "📹"
+  },
+  {
+    title: "Recursos de Matemáticas",
+    description: "Recursos de matemáticas completos, incluyendo hojas de trabajo, actividades y pruebas de práctica.",
+    icon: "📚"
+  }
+];
+
 const testimonials = [
   {
     name: "Doris Tito",
@@ -37,56 +53,7 @@ const testimonials = [
   },
 ];
 
-
-const carouselItems = [
-  {
-    image: carouselImage1,
-    text: "Aprende matemáticas de manera fácil y divertida"
-  },
-  {
-    image: carouselImage2,
-    text: "Apoyo personalizado"
-  },
-  {
-    image: carouselImage3,
-    text: "Resultados garantizados"
-  }
-];
-
-const services = [
-  {
-    title: "Tutoría de Matemáticas",
-    description: "Nuestros tutores expertos brindan apoyo personalizado para ayudar a los estudiantes a sobresalir en matemáticas.",
-    icon: "📘"
-  },
-  {
-    title: "Videos de Matemáticas",
-    description: "Videos de matemáticas interactivos y atractivos para ayudar a los estudiantes a entender conceptos complejos.",
-    icon: "📹"
-  },
-  {
-    title: "Recursos de Matemáticas",
-    description: "Recursos de matemáticas completos, incluyendo hojas de trabajo, actividades y pruebas de práctica.",
-    icon: "📚"
-  }
-];
-
-const clients = [
-  { name: 'Colegio Nacional', logo: clientLogo1 },
-  { name: 'Colegio Particular', logo: clientLogo2 },
-  { name: 'Universidad', logo: clientLogo3 },
-  { name: 'Instituto', logo: clientLogo4 },
-];
-
 const LandingPage = () => {
-
-  const [username, setUsername] = useState('');
-  const [anchorEl, setAnchorEl] = useState(null); // Estado para el menú desplegable
-  const navigate = useNavigate();
-  const [points, setPoints] = useState(0); // Estado para los puntos
-
-
-
   const [ads] = useState(() => {
     const storedAds = JSON.parse(localStorage.getItem('ads'));
     return storedAds || [
@@ -95,120 +62,38 @@ const LandingPage = () => {
     ];
   });
 
-  useEffect(() => {
-    const storedUsername = localStorage.getItem('username');
-    const storedToken = localStorage.getItem('token');
-
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
-
-    // Obtener los puntos del usuario desde la API
-    const fetchPoints = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/users/points', {
-          headers: {
-            'Authorization': `Bearer ${storedToken}`,
-          },
-        });
-        setPoints(response.data.points); // Asignar los puntos obtenidos
-      } catch (error) {
-        console.error('Error al obtener los puntos:', error);
-      }
-    };
-
-    if (storedToken) {
-      fetchPoints(); // Llamada a la API para obtener los puntos
-    }
-  }, []);
-
-
-  const handleLogout = async () => {
-    const token = localStorage.getItem('token');
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/logout', {}, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.status === 200) {
-        console.log('Cierre de sesión exitoso');
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        navigate('/login');
-      }
-    } catch (error) {
-      console.error('Error al cerrar sesión', error);
-    }
-  };
-
-  // Funciones para manejar la apertura y cierre del menú
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-
-
   return (
     <Box sx={{ bgcolor: '#FEFEFE', minHeight: '100vh' }}>
-      <AppBar position="static" sx={{ bgcolor: '#1E494F' }}>
-        <Toolbar>
-          <img src={logo} alt="Logo" style={{ marginRight: 20, width: '50px', height: '50px' }} />
-          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            MasterBikas
-          </Typography>
-          <nav>
-            <Button color="inherit" sx={{ fontWeight: 'bold', color: '#FEFEFE' }} component={Link} to="/">Inicio</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/services">Servicios</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/about">Sobre Nosotros</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/contact">Contacto</Button>
-          </nav>
-
-          {username ? (
-            <>
-              <Typography sx={{ color: '#FEFEFE', marginRight: '10px' }}>
-                Hola {username}
-              </Typography>
-              {/* Ícono del oso y puntos */}
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <IconButton onClick={handleMenuClick}>
-                  <Avatar src={osoIcon} alt="Oso" />
-                </IconButton>
-                <Typography sx={{ color: '#FEFEFE', marginLeft: '8px' }}>
-                  {points} pts
-                </Typography>
-              </Box>
-              {/* Menú desplegable */}
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-              >
-                <MenuItem onClick={() => navigate('/user-profile')}>Mi Perfil</MenuItem>
-                <MenuItem onClick={() => navigate('/puntos')}>Mis Puntos</MenuItem>
-                <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <Button color="inherit" component={Link} to="/login" sx={{ color: '#FEFEFE' }}>INICIAR SESIÓN</Button>
-          )}
-        </Toolbar>
-      </AppBar>
+      <Navbar />
 
       <Box sx={{ width: '100%', p: 0 }}>
         <Carousel indicators={false} navButtonsAlwaysInvisible>
           {carouselItems.map((item, index) => (
-            <Box key={index} sx={{ height: '70vh', textAlign: 'center', position: 'relative', width: '100%' }}>
-              <img src={item.image} alt={`Carousel ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              <Typography variant="h4" sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#FFFFFF' }}>
-                {item.text}
-              </Typography>
-            </Box>
+            <Box key={index} sx={{ height: '100vh', textAlign: 'center', position: 'relative', width: '100%' }}>
+            <img 
+              src={item.image} 
+              alt={`Carousel ${index}`} 
+              style={{ 
+                width: '100%', 
+                height: '100vh', 
+                objectFit: 'cover',
+                objectPosition: 'top'
+              }} 
+            />
+            <Typography 
+              variant="h4" 
+              sx={{ 
+                position: 'absolute', 
+                top: '50%', 
+                left: '50%', 
+                transform: 'translate(-50%, -50%)', 
+                color: '#FFFFFF' 
+              }}
+            >
+              {item.text}
+            </Typography>
+          </Box>
+          
           ))}
         </Carousel>
       </Box>

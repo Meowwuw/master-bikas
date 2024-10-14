@@ -1,9 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Container, Typography, Box, Divider, Tabs, Tab, AppBar, Toolbar, Button, IconButton } from '@mui/material';
+import { Container, Typography, Box, Divider, Tabs, Tab } from '@mui/material';
 import { useState } from 'react';
-import LoginIcon from '@mui/icons-material/Login';
-import logo from '../assets/images/logo.jpeg';
+import Navbar from './Navbar'; 
 
 const teamMembers = [
   {
@@ -32,23 +30,7 @@ const SobreNosotros = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#FEFEFE' }}>
-      <AppBar position="static" sx={{ bgcolor: '#1E494F' }}>
-        <Toolbar>
-          <img src={logo} alt="Logo" style={{ marginRight: 20, width: '50px', height: '50px' }} />
-          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            MasterBikas
-          </Typography>
-          <nav>
-            <Button component={Link} to="/" color="inherit" sx={{ fontWeight: 'bold', color: '#FEFEFE' }}>Inicio</Button>
-            <Button component={Link} to="/services" color="inherit" sx={{ color: '#FEFEFE' }}>Servicios</Button>
-            <Button component={Link} to="/about" color="inherit" sx={{ color: '#FEFEFE' }}>Sobre Nosotros</Button>
-            <Button component={Link} to="/contact" color="inherit" sx={{ color: '#FEFEFE' }}>Contacto</Button>
-          </nav>
-          <IconButton color="inherit">
-            <LoginIcon sx={{ color: '#FEFEFE' }} />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+      <Navbar />
       <Container maxWidth="lg" sx={{ flex: 1 }}>
         <Box sx={{ my: 4 }}>
           <Tabs value={value} onChange={handleChange} centered>

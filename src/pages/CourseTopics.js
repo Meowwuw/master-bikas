@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Container, Typography, Button, Box, AppBar, Toolbar, IconButton, TextField, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
-import LoginIcon from '@mui/icons-material/Login';
+import {  useNavigate, useParams } from 'react-router-dom';
+import { Container, Typography, Box,TextField, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import logo from '../assets/images/logo.jpeg';
+import Navbar from './Navbar'; 
 
 // Mock data for course topics
 const courseTopics = {
@@ -53,24 +52,7 @@ const CourseTopics = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="static" sx={{ bgcolor: '#1E494F' }}>
-        <Toolbar>
-          <img src={logo} alt="Logo" style={{ marginRight: 20, width: '50px', height: '50px' }} />
-          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            MasterBikas
-          </Typography>
-          <nav>
-            <Button color="inherit" sx={{ fontWeight: 'bold', color: '#FEFEFE' }} component={Link} to="/">Inicio</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/services">Servicios</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/about">Sobre Nosotros</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/contact">Contacto</Button>
-          </nav>
-          <IconButton color="inherit">
-            <LoginIcon sx={{ color: '#FEFEFE' }} />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-
+      <Navbar />
       <Container sx={{ flexGrow: 1 }}>
         <Autocomplete
           freeSolo

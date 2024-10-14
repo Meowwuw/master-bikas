@@ -4,24 +4,32 @@ import { Container, Typography, Button, Box, AppBar, Toolbar, IconButton, TextFi
 import LoginIcon from '@mui/icons-material/Login';
 import logo from '../assets/images/logo.jpeg';
 import answerImage from '../assets/images/answer.jpg';
-import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 
-const questionDetails = {
-  'Pregunta 1 de Tema 1': { video: 'video1_url', answer: 'Respuesta detallada de Pregunta 1 de Tema 1' },
-  'Pregunta 2 de Tema 1': { video: 'video2_url', answer: 'Respuesta detallada de Pregunta 2 de Tema 1' },
-};
-
 const QuestionDetail = () => {
-  const { questionName } = useParams();
-  const question = questionDetails[questionName] || {};
-  const navigate = useNavigate();
-  
+  const { courseId, topicId, questionId } = useParams();
+  const [question, setQuestion] = useState({});
   const [attempts, setAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(true); 
   const [comment, setComment] = useState('');
+  const navigate = useNavigate();
 
+  
+  // Obtener los detalles de la pregunta desde la API
   useEffect(() => {
+    const fetchQuestionDetails = async () => {
+      try {
+        console.log(`Fetching details for question ID: ${questionId}`);
+        const response = await axios.get(`http://localhost:5000/api/questions/${questionId}`);
+        setQuestion(response.data);
+      } catch (error) {
+        console.error('Error al obtener los detalles de la pregunta:', error);
+      }
+    };
+    console.log("Question ID:", questionId);
+    
+    
+
     const fetchAttempts = async () => {
       const token = localStorage.getItem('token');
       if (token) {
@@ -32,14 +40,15 @@ const QuestionDetail = () => {
             },
           });
           setAttempts(response.data.remaining_attempts);
-          // Mantener el contenido bloqueado inicialmente
         } catch (error) {
-          console.error('Error fetching attempts:', error);
+          console.error('Error al obtener los intentos:', error);
         }
       }
     };
+
+    fetchQuestionDetails();
     fetchAttempts();
-  }, []);
+  }, [questionId]);
 
   const handleUnlockContent = async () => {
     const token = localStorage.getItem('token');
@@ -61,7 +70,7 @@ const QuestionDetail = () => {
         if (error.response && error.response.status === 403) {
           navigate('/pago');
         } else {
-          console.error('Error using attempts:', error);
+          console.error('Error al usar los intentos:', error);
         }
       }
     } else {
@@ -79,7 +88,7 @@ const QuestionDetail = () => {
       try {
         const response = await axios.post(
           'http://localhost:5000/api/users/comments',
-          { questionName: questionName, commentText: comment }, // Modificación aquí
+          { questionId, commentText: comment },
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
         if (response.status === 201) {
@@ -87,13 +96,12 @@ const QuestionDetail = () => {
           setComment('');
         }
       } catch (error) {
-        console.error('Error submitting comment:', error);
+        console.error('Error al enviar el comentario:', error);
       }
     } else {
       navigate('/register');
     }
   };
-  
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -117,7 +125,7 @@ const QuestionDetail = () => {
 
       <Container sx={{ flexGrow: 1 }}>
         <Typography variant="h4" sx={{ my: 4, textAlign: 'center', color: '#1E494F' }}>
-          {questionName}
+          {question.text} {/* Mostrar el título de la pregunta */}
         </Typography>
 
         {/* Mostrar el contenido según los intentos */}
@@ -133,7 +141,7 @@ const QuestionDetail = () => {
             }}
           />
           <video
-            src={question.video}
+            src={question.video} // Si tienes un video asociado
             controls={!isLocked}
             style={{
               width: '100%',

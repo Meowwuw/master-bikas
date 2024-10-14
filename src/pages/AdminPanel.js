@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Button, Container, TextField, Box, InputBase, IconButton, Card, CardHeader, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Container, TextField, Box, InputBase, IconButton, Card, CardHeader, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PeopleIcon from '@mui/icons-material/People';
@@ -17,6 +17,10 @@ const AdminPanel = () => {
   const [editPaymentId, setEditPaymentId] = useState(null);
   const [editStatus, setEditStatus] = useState('');
   const [editAmount, setEditAmount] = useState('');
+
+  // Paginación
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchPayments();
@@ -56,9 +60,18 @@ const AdminPanel = () => {
   };
 
   const handleLogout = () => {
-    // Lógica para limpiar cualquier estado de autenticación, como tokens, etc.
-
     navigate('/');
+  };
+
+  // Cambiar la página actual
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  // Cambiar el número de filas por página
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   return (
@@ -71,7 +84,7 @@ const AdminPanel = () => {
           <nav className="flex flex-row gap-5">
             <Button color="inherit" sx={{ fontWeight: 'bold', color: '#FCFBFC' }}>Dashboard</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }}>Colegios</Button>
-            <Button color="inherit" sx={{ color: '#FCFBFC' }}>Cursos</Button>
+            <Button color="inherit" sx={{ color: '#FCFBFC' }} onClick={() => navigate('/admin/coursePanel')}>Cursos</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }}>Temas</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }}>Supervisores</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }}>Problemas</Button>
@@ -173,61 +186,73 @@ const AdminPanel = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {payments.map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell>{payment.id}</TableCell>
-                        <TableCell>{payment.email}</TableCell>
-                        <TableCell>
-                          {editPaymentId === payment.id ? (
-                            <TextField
-                              value={editStatus}
-                              onChange={(e) => setEditStatus(e.target.value)}
-                              select
-                              SelectProps={{ native: true }}
-                            >
-                              <option value="pendiente">Pendiente</option>
-                              <option value="confirmado">Confirmado</option>
-                            </TextField>
-                          ) : (
-                            payment.status
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {editPaymentId === payment.id ? (
-                            <TextField
-                              value={editAmount}
-                              onChange={(e) => setEditAmount(e.target.value)}
-                              type="number"
-                            />
-                          ) : (
-                            payment.amount !== null && payment.amount !== undefined
-                              ? parseFloat(payment.amount).toFixed(2)
-                              : 'N/A' // o cualquier mensaje predeterminado que quieras mostrar si el monto no está definido
-                          )}
-                        </TableCell>
-
-                        <TableCell align="right">
-                          {editPaymentId === payment.id ? (
-                            <>
-                              <Button onClick={() => handleSaveClick(payment.id)}>Guardar</Button>
-                              <Button onClick={handleCancelClick}>Cancelar</Button>
-                            </>
-                          ) : (
-                            <>
-                              <IconButton size="small" onClick={() => handleEditClick(payment)}>
-                                <EditIcon />
-                              </IconButton>
-                              <IconButton size="small">
-                                <DeleteIcon />
-                              </IconButton>
-                            </>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {payments
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell>{payment.id}</TableCell>
+                          <TableCell>{payment.email}</TableCell>
+                          <TableCell>
+                            {editPaymentId === payment.id ? (
+                              <TextField
+                                value={editStatus}
+                                onChange={(e) => setEditStatus(e.target.value)}
+                                select
+                                SelectProps={{ native: true }}
+                              >
+                                <option value="pendiente">Pendiente</option>
+                                <option value="confirmado">Confirmado</option>
+                              </TextField>
+                            ) : (
+                              payment.status
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {editPaymentId === payment.id ? (
+                              <TextField
+                                value={editAmount}
+                                onChange={(e) => setEditAmount(e.target.value)}
+                                type="number"
+                              />
+                            ) : (
+                              payment.amount !== null && payment.amount !== undefined
+                                ? parseFloat(payment.amount).toFixed(2)
+                                : 'N/A'
+                            )}
+                          </TableCell>
+                          <TableCell align="right">
+                            {editPaymentId === payment.id ? (
+                              <>
+                                <Button onClick={() => handleSaveClick(payment.id)}>Guardar</Button>
+                                <Button onClick={handleCancelClick}>Cancelar</Button>
+                              </>
+                            ) : (
+                              <>
+                                <IconButton size="small" onClick={() => handleEditClick(payment)}>
+                                  <EditIcon />
+                                </IconButton>
+                                <IconButton size="small">
+                                  <DeleteIcon />
+                                </IconButton>
+                              </>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </TableContainer>
+
+              {/* Paginador */}
+              <TablePagination
+                component="div"
+                count={payments.length}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[10, 20, 30]} // Opciones de filas por página
+              />
             </Card>
           </Box>
         </Container>
