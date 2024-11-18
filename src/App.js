@@ -14,6 +14,7 @@ import Register from './pages/Register';
 import SobreNosotros from './pages/SobreNosotros';
 import Contacto from './pages/Contacto';
 import PublicidadConfig from './pages/PublicidadConfig';
+import TestimonialsAdmin from './pages/TestimonialsAdmin';
 import PagoYape from './pages/PagoYape';
 import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
@@ -21,6 +22,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import UserProfile from './pages/UserProfile';
 import Podium from './pages/Podium';
 import CoursePanel from './pages/CoursePanel';
+import PreguntasSemanales from './pages/PreguntasSemanales';
 
 const App = () => {
   return (
@@ -33,6 +35,7 @@ const App = () => {
         <Route path="/client" element={<ClientView />} />
         <Route path="/services" element={<Services />} />
         <Route path="/preguntas-personalizadas" element={<PreguntasPersonalizadas />} />
+        <Route path="/preguntas-semanales" element={<PreguntasSemanales/>} />
         <Route path="/course/:courseName" element={<CourseTopics />} />
         <Route path="/course/:courseId/topics" element={<TopicQuestions />} />
         <Route path="/course/:courseId/topic/:topicId/questions/:questionId" element={<QuestionDetail />} />
@@ -40,6 +43,7 @@ const App = () => {
         <Route path="/about" element={<SobreNosotros />} />
         <Route path="/contact" element={<Contacto />} />
         <Route path="/admin/publicidad" element={<PublicidadConfig />} />
+        <Route path="/admin/testimonios" element={<TestimonialsAdmin />} />
         <Route path="/pago" element={<PagoYape />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/reset-password" element={<ResetPassword />} />

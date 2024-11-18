@@ -1,40 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Container, Typography, Button, Box, AppBar, Toolbar, IconButton, TextField } from '@mui/material';
+import { Container, Typography, Button, Box, AppBar, Toolbar, IconButton } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
-import logo from '../assets/images/logo.jpeg';
-import answerImage from '../assets/images/answer.jpg';
+import logo from '../assets/images/logo.png';
 import axios from 'axios';
 
 const QuestionDetail = () => {
   const { courseId, topicId, questionId } = useParams();
   const [question, setQuestion] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false); 
   const [attempts, setAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(true); 
-  const [comment, setComment] = useState('');
   const navigate = useNavigate();
 
-  
   // Obtener los detalles de la pregunta desde la API
   useEffect(() => {
     const fetchQuestionDetails = async () => {
       try {
-        console.log(`Fetching details for question ID: ${questionId}`);
-        const response = await axios.get(`http://localhost:5000/api/questions/${questionId}`);
+        const response = await axios.get(`http://54.165.220.109:3000/api/questions/${questionId}`);
         setQuestion(response.data);
       } catch (error) {
         console.error('Error al obtener los detalles de la pregunta:', error);
       }
     };
-    console.log("Question ID:", questionId);
-    
-    
 
     const fetchAttempts = async () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get('http://localhost:5000/api/users/attempts', {
+          const response = await axios.get('http://54.165.220.109:3000/api/users/attempts', {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
@@ -51,55 +45,31 @@ const QuestionDetail = () => {
   }, [questionId]);
 
   const handleUnlockContent = async () => {
+    if (isSubmitting) return; // Evitar múltiples clics
+    setIsSubmitting(true);
+  
     const token = localStorage.getItem('token');
     if (token) {
       try {
-        const response = await axios.post('http://localhost:5000/api/users/attempts/use', {}, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+        const response = await axios.post('http://54.165.220.109:3000/api/users/attempts/use', {}, {
+          headers: { 'Authorization': `Bearer ${token}` },
         });
-        if (response.data.remaining_attempts > 0) {
-          setIsLocked(false); // Desbloquear contenido si quedan intentos
+        if (response.data.remaining_attempts >= 0) {
+          setIsLocked(false);
           setAttempts(response.data.remaining_attempts);
         } else {
-          setIsLocked(true); // Mantener bloqueado si no quedan intentos
-          navigate('/pago'); // Redirigir al pago si se acabaron los intentos
-        }
-      } catch (error) {
-        if (error.response && error.response.status === 403) {
+          setIsLocked(true);
           navigate('/pago');
-        } else {
-          console.error('Error al usar los intentos:', error);
-        }
-      }
-    } else {
-      navigate('/register');
-    }
-  };
-
-  const handlePayClick = () => {
-    navigate('/pago');
-  };
-
-  const handleCommentSubmit = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const response = await axios.post(
-          'http://localhost:5000/api/users/comments',
-          { questionId, commentText: comment },
-          { headers: { 'Authorization': `Bearer ${token}` } }
-        );
-        if (response.status === 201) {
-          alert('Comentario guardado exitosamente');
-          setComment('');
         }
       } catch (error) {
-        console.error('Error al enviar el comentario:', error);
+        console.error('Error al usar los intentos:', error);
+        if (error.response?.status === 403) navigate('/pago');
+      } finally {
+        setIsSubmitting(false); // Permitir clics de nuevo
       }
     } else {
       navigate('/register');
+      setIsSubmitting(false);
     }
   };
 
@@ -125,29 +95,17 @@ const QuestionDetail = () => {
 
       <Container sx={{ flexGrow: 1 }}>
         <Typography variant="h4" sx={{ my: 4, textAlign: 'center', color: '#1E494F' }}>
-          {question.text} {/* Mostrar el título de la pregunta */}
+          {question.QUESTION_TEXT}
         </Typography>
 
-        {/* Mostrar el contenido según los intentos */}
         <div>
           <img
-            src={answerImage}
+            src={isLocked ? question.QUESTION_IMAGE : question.QUESTION_IMAGE}
             alt="Answer"
             style={{
               width: '100%',
               maxHeight: '400px',
               filter: isLocked ? 'blur(10px)' : 'none',
-              transition: 'filter 0.5s ease'
-            }}
-          />
-          <video
-            src={question.video} // Si tienes un video asociado
-            controls={!isLocked}
-            style={{
-              width: '100%',
-              maxHeight: '400px',
-              filter: isLocked ? 'grayscale(100%)' : 'none',
-              pointerEvents: isLocked ? 'none' : 'auto',
               transition: 'filter 0.5s ease'
             }}
           />
@@ -157,27 +115,9 @@ const QuestionDetail = () => {
           {isLocked ? 'Este contenido está bloqueado.' : question.answer}
         </Typography>
 
-        {/* Botón para desbloquear contenido */}
         <Button variant="outlined" color="secondary" sx={{ mt: 4 }} onClick={handleUnlockContent}>
           Desbloquear Contenido
         </Button>
-
-        {/* Sección de comentarios siempre visible */}
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h6">Comentarios</Typography>
-          <TextField
-            label="Deja tu comentario"
-            multiline
-            rows={4}
-            fullWidth
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-          <Button variant="contained" sx={{ mt: 2 }} onClick={handleCommentSubmit}>
-            Enviar Comentario
-          </Button>
-        </Box>
       </Container>
 
       <Box sx={{ bgcolor: '#1E494F', color: '#FEFEFE', textAlign: 'center', p: 2, mt: 'auto' }}>

@@ -33,7 +33,7 @@ const Contacto = () => {
               </Typography>
               <TextField label="Nombre" variant="outlined" required fullWidth />
               <TextField label="Apellido" variant="outlined" required fullWidth />
-              <TextField label="Correo empresarial" variant="outlined" required fullWidth />
+              <TextField label="Correo" variant="outlined" required fullWidth />
               <TextField label="Teléfono" variant="outlined" required fullWidth />
               <Button type="submit" variant="contained" color="primary" fullWidth>
                 Enviar

@@ -4,7 +4,7 @@ import { Container, Box, Button, Typography, AppBar, Toolbar, IconButton, TextFi
 import QRCode from 'qrcode.react';
 import axios from 'axios';
 
-import logo from '../assets/images/logo.jpeg';
+import logo from '../assets/images/logo.png';
 import LoginIcon from '@mui/icons-material/Login';
 
 const PagoYape = () => {
@@ -50,17 +50,22 @@ const PagoYape = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/api/payments/confirm',
-        { amount }, // Se envía el monto
+        'http://54.165.220.109:3000/api/payments/confirm',
+        { 
+          amount, 
+          payment_method: 'YAPE', 
+          currency: 'PEN', 
+          description: 'Pago por acceso a contenido' 
+        },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Incluir el token JWT correctamente
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-
+  
       if (response.status === 200) {
-        setPaymentConfirmed(true); // Actualiza el estado para mostrar el temporizador
+        setPaymentConfirmed(true);
         alert('Pago realizado. Espera la confirmación.');
       }
     } catch (error) {
@@ -68,18 +73,18 @@ const PagoYape = () => {
       alert('Hubo un problema al procesar tu pago.');
     }
   };
-
+  
   const checkPaymentStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/payments/check-payment-status', {
+      const response = await axios.get('http://54.165.220.109:3000/api/payments/check-payment-status', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       if (response.data.status === 'confirmado') {
-        navigate('/course/:courseName/topic/:topicName/question/:questionName'); 
+        navigate('/content-access'); // Cambia a la ruta adecuada
       } else {
         console.log('El pago no ha sido confirmado todavía.');
       }
@@ -88,6 +93,7 @@ const PagoYape = () => {
       alert('Hubo un problema al verificar el estado del pago.');
     }
   };
+  
 
   return (
     <Box sx={{ bgcolor: '#FEFEFE', minHeight: '100vh' }}>

@@ -6,16 +6,16 @@ import bronzeTrophy from '../assets/images/trophy3.png';
 
 const Podium = () => {
   const [topUsers, setTopUsers] = useState([
-    { username: 'N/A', points: 0 },
-    { username: 'N/A', points: 0 },
-    { username: 'N/A', points: 0 }
+    { NAMES: 'N/A', POINTS: 0 },
+    { NAMES: 'N/A', POINTS: 0 },
+    { NAMES: 'N/A', POINTS: 0 }
   ]);
 
   useEffect(() => {
     const fetchTopUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/users/top-points');
-        setTopUsers(response.data); // Update with top users
+        const response = await axios.get('http://54.165.220.109:3000/api/users/top-points');
+        setTopUsers(response.data); 
       } catch (error) {
         console.error('Error al obtener los usuarios con más puntos:', error);
       }
@@ -25,26 +25,26 @@ const Podium = () => {
   }, []);
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '20px',padding: '30px 0px' }}>
+    <div style={{ textAlign: 'center', marginTop: '20px', padding: '30px 0px' }}>
       <h2 style={{ color: '#000' }}>Podio de Usuarios con más puntos</h2>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }}>
         {/* Silver Trophy */}
         <div style={{ marginRight: '20px', textAlign: 'center' }}>
           <img src={silverTrophy} alt="Silver Trophy" style={{ height: '150px' }} />
-          <p>{topUsers[1]?.username || 'N/A'}</p>
-          <p>{topUsers[1]?.points || 0} puntos</p>
+          <p>{topUsers[1]?.NAMES || 'N/A'}</p>
+          <p>{topUsers[1]?.POINTS || 0} puntos</p>
         </div>
         {/* Gold Trophy */}
         <div style={{ margin: '0 20px', textAlign: 'center' }}>
           <img src={goldTrophy} alt="Gold Trophy" style={{ height: '200px' }} />
-          <p>{topUsers[0]?.username || 'N/A'}</p>
-          <p>{topUsers[0]?.points || 0} puntos</p>
+          <p>{topUsers[0]?.NAMES || 'N/A'}</p>
+          <p>{topUsers[0]?.POINTS || 0} puntos</p>
         </div>
         {/* Bronze Trophy */}
         <div style={{ marginLeft: '20px', textAlign: 'center' }}>
           <img src={bronzeTrophy} alt="Bronze Trophy" style={{ height: '150px' }} />
-          <p>{topUsers[2]?.username || 'N/A'}</p>
-          <p>{topUsers[2]?.points || 0} puntos</p>
+          <p>{topUsers[2]?.NAMES || 'N/A'}</p>
+          <p>{topUsers[2]?.POINTS || 0} puntos</p>
         </div>
       </div>
     </div>

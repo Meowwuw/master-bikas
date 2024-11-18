@@ -13,9 +13,9 @@ const VerifyEmail = () => {
 
     const verifyEmail = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/users/verify-email?token=${token}`);
+        const response = await axios.get(`http://master-bikas.com/api/users/verify-email?token=${token}`);
         setMessage('Correo verificado exitosamente.');
-        setTimeout(() => navigate('/login'), 3000);  // Redirige al login después de 3 segundos
+        setTimeout(() => navigate('/login'), 3000); // Redirige al login después de 3 segundos
       } catch (error) {
         setMessage('Error al verificar el correo. Por favor, inténtalo de nuevo.');
       }

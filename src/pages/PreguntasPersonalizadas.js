@@ -1,236 +1,462 @@
-import React, { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
-import Navbar from './Navbar';
-import logo from '../assets/images/logo.jpeg';
-
-import { Typography, TextField, Box, Button, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, Select, MenuItem, 
-    Dialog, DialogTitle, DialogContent, DialogActions, Grid } from '@mui/material';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+import Navbar from "./Navbar";
+import TicketDialog from "./TicketDialog";
+import QR from "../assets/images/QR.jpeg";
+import QR2 from "../assets/images/QR2.jpeg";
+import {
+  Typography,
+  TextField,
+  Box,
+  Button,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  Select,
+  MenuItem,
+  Grid,
+} from "@mui/material";
+import axios from "axios";
 
 const PreguntasPersonalizadas = () => {
-    const [selectedOption, setSelectedOption] = useState('correo');
-    const [selectedCourse, setSelectedCourse] = useState('');
-    const [selectedLevel, setSelectedLevel] = useState('');
-    const [amount, setAmount] = useState('');
-    const [userEmail, setUserEmail] = useState('');
-    const [userPhone, setUserPhone] = useState('');
-    const [editablePhone, setEditablePhone] = useState(false);
-    const [openDialog, setOpenDialog] = useState(false); 
-    const [paymentProof, setPaymentProof] = useState(null); 
+  const [selectedOption, setSelectedOption] = useState("correo");
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState("");
+  const [schoolName, setSchoolName] = useState("");
+  const [amount, setAmount] = useState(1);
+  const [userEmail, setUserEmail] = useState("");
+  const [userPhone, setUserPhone] = useState("");
+  const [questionImage, setQuestionImage] = useState(null);
+  const [paymentProof, setPaymentProof] = useState(null);
+  const [questionUploaded, setQuestionUploaded] = useState(false);
+  const [paymentUploaded, setPaymentUploaded] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [ticketId, setTicketId] = useState("");
+  const [error, setError] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [whatsappOption, setWhatsappOption] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = jwtDecode(token);
 
-
-    useEffect(() => {
-        const token = localStorage.getItem('token'); 
-        if (token) {
-            const decodedToken = jwtDecode(token); 
-            const userId = decodedToken.id; 
-
-            console.log('Decoded Token:', decodedToken);
-
-            const fetchUserData = async () => {
-                try {
-                    const perfilResponse = await axios.get(`http://localhost:5000/api/perfil/${userId}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-
-                    if (perfilResponse.data && perfilResponse.data.telefono) {
-                        setUserPhone(perfilResponse.data.telefono); 
-                        setEditablePhone(false); 
-                    } else {
-                        setEditablePhone(true);
-                    }
-
-                    const userResponse = await axios.get(`http://localhost:5000/api/users/${userId}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-
-                    setUserEmail(userResponse.data.email);
-                } catch (error) {
-                    console.error('Error al obtener los datos del usuario:', error);
-                    setEditablePhone(true);
-                }
-            };
-
-            fetchUserData();
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get(
+            "http://54.165.220.109:3000/api/perfil",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setUserPhone(response.data.TELEPHONE || "");
+          setUserEmail(response.data.EMAIL || "");
+        } catch (error) {
+          console.error("Error al obtener los datos del usuario:", error);
         }
-    }, []);
+      };
 
-    const handleSubmit = () => {
-        // Al enviar, abre el diálogo
-        setOpenDialog(true);
+      fetchUserData();
+    }
+
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get(
+          "http://54.165.220.109:3000/api/courses"
+        );
+        setCourses(response.data);
+      } catch (error) {
+        console.error("Error al obtener los cursos:", error);
+      }
     };
 
-    const handleCloseDialog = () => {
-        setOpenDialog(false); // Cierra el diálogo
-    };
+    fetchCourses();
+  }, []);
 
+  const handleFileChange = (e, type) => {
+    const file = e.target.files[0];
+    const validExtensions = ["image/png", "image/jpeg", "image/jpg"];
 
-    const handleFileChange = (e) => {
-        setPaymentProof(e.target.files[0]); // Asigna la imagen cargada
-    };
+    if (!file || !validExtensions.includes(file.type)) {
+      setError("Solo se permiten archivos de tipo PNG, JPG o JPEG.");
+      return;
+    }
 
-    return (
-        <Box sx={{ bgcolor: '#FEFEFE', minHeight: '100vh' }}>
-            <Navbar />
-            {/* Título */}
-            <Box sx={{ p: 5, mt: 2, mb: 5 }}>
-                <Typography variant="h4" gutterBottom>
-                    Envíanos tus preguntas
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                    ¿No encontraste una pregunta similar a la que buscas? No te preocupes, envíanos tu ejercicio y te enviaremos la solución en menos de 1 hora.
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                    Por favor, completa la siguiente información:
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                    ¿Dónde deseas que te enviemos la solución?
-                </Typography>
+    setError("");
 
-                <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                <FormControl component="fieldset" sx={{ mb: 3 }}>
-                    <FormLabel component="legend">Opciones de envío</FormLabel>
-                    <RadioGroup
-                        row
-                        value={selectedOption}
-                        onChange={(e) => setSelectedOption(e.target.value)}
-                    >
-                        <FormControlLabel value="correo" control={<Radio />} label="Correo" />
-                        <FormControlLabel value="whatsapp" control={<Radio />} label="WhatsApp" />
-                    </RadioGroup>
-                </FormControl>
+    if (type === "question") {
+      setQuestionImage(file);
+      setQuestionUploaded(true);
+    }
 
-                {selectedOption === 'correo' && (
-                    <TextField
-                        label="Correo"
-                        value={userEmail}
-                        fullWidth
-                        sx={{ mb: 3 }}
-                        disabled
-                    />
-                )}
+    if (type === "payment") {
+      setPaymentProof(file);
+      setPaymentUploaded(true);
+    }
+  };
 
-                {selectedOption === 'whatsapp' && (
-                    <TextField
-                        label="Número de WhatsApp"
-                        value={userPhone}
-                        onChange={(e) => {
-                            setUserPhone(e.target.value);
-                            setEditablePhone(true); // Si el usuario empieza a escribir, se habilita la edición
-                        }}
-                        fullWidth
-                        sx={{ mb: 3 }}
-                        disabled={!editablePhone && userPhone !== ""} // Solo deshabilita si ya tiene un número registrado
-                    />
-                )}
+  const handleWhatsAppOption = async () => {
+    setWhatsappOption(true);
+    setPaymentProof(null);
+    setPaymentUploaded(false);
 
+    // Datos a enviar al backend
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "http://54.165.220.109:3000/api/pregunta",
+        {
+          COURSE_ID: selectedCourse,
+          SCHOOL_CATEGORY: selectedLevel,
+          SCHOOL_NAME: schoolName,
+          CUSTOM_QUESTION_URL: null,
+          CUSTOM_PAYMENT_URL: null,
+          WHATSAPP_OPTION: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-                <FormControl fullWidth sx={{ mb: 3 }}>
-                    <Select
-                        value={selectedCourse}
-                        onChange={(e) => setSelectedCourse(e.target.value)}
-                        displayEmpty
-                    >
-                        <MenuItem value="" disabled>
-                            Selecciona el curso
-                        </MenuItem>
-                        <MenuItem value="matematicas">Matemáticas</MenuItem>
-                        <MenuItem value="fisica">Física</MenuItem>
-                        <MenuItem value="quimica">Química</MenuItem>
-                    </Select>
-                </FormControl>
+      const ticketId = response.data.ticketId;
 
-                <FormControl fullWidth sx={{ mb: 3 }}>
-                    <Select
-                        value={selectedLevel}
-                        onChange={(e) => {
-                            const level = e.target.value;
-                            setSelectedLevel(level);
+      // Redirigir a WhatsApp
+      const message = encodeURIComponent(
+        `Hola, tengo una consulta personalizada. Mi ticket es ${ticketId}. Por favor, ayúdenme con más información.`
+      );
+      const whatsappUrl = `https://wa.me/${
+        userPhone || "000000000"
+      }?text=${message}`;
+      window.open(whatsappUrl, "_blank");
 
-                            // Asigna el monto basado en el nivel seleccionado
-                            if (level === 'primaria') {
-                                setAmount(2);
-                            } else if (level === 'secundaria') {
-                                setAmount(5);
-                            } else if (level === 'universitario') {
-                                setAmount(15);
-                            }
-                        }}
-                        displayEmpty
-                    >
-                        <MenuItem value="" disabled>
-                            Selecciona el nivel de estudio
-                        </MenuItem>
-                        <MenuItem value="primaria">Colegio</MenuItem>
-                        <MenuItem value="secundaria">Pre-universitario</MenuItem>
-                        <MenuItem value="universitario">Universitario</MenuItem>
-                    </Select>
-                </FormControl>
+      setTicketId(ticketId);
+      setOpenDialog(true);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error al enviar la pregunta por WhatsApp:", error);
+      setError("No se pudo enviar la consulta. Intenta de nuevo.");
+    }
+  };
 
-                <TextField
-                    label="Monto a pagar"
-                    type="number"
-                    value={amount}
-                    fullWidth
-                    sx={{ mb: 3 }}
-                    disabled // El campo no será editable
+  const handleSubmit = async () => {
+    if (!questionImage && !whatsappOption) {
+      setError(
+        "Por favor, adjunta una imagen de la pregunta o elige enviar por WhatsApp."
+      );
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      let questionImageUrl = null;
+
+      if (questionImage) {
+        // Subir la imagen de la pregunta
+        const questionFormData = new FormData();
+        questionFormData.append("file", questionImage);
+        const questionUploadResponse = await axios.post(
+          "http://54.165.220.109:3000/api/upload-question",
+          questionFormData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        questionImageUrl = questionUploadResponse.data.url;
+      }
+
+      // Enviar los datos al backend
+      const response = await axios.post(
+        "http://54.165.220.109:3000/api/pregunta",
+        {
+          COURSE_ID: selectedCourse,
+          SCHOOL_CATEGORY: selectedLevel,
+          SCHOOL_NAME: schoolName,
+          CUSTOM_QUESTION_URL: questionImageUrl,
+          CUSTOM_PAYMENT_URL: null,
+          WHATSAPP_OPTION: whatsappOption,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setTicketId(response.data.ticketId);
+      setOpenDialog(true); // Abre el diálogo de confirmación
+    } catch (error) {
+      console.error("Error al enviar la pregunta:", error);
+      setError("Error al enviar la pregunta. Por favor, intenta nuevamente.");
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    window.location.reload();
+  };
+
+  return (
+    <Box sx={{ bgcolor: "#FEFEFE", minHeight: "100vh" }}>
+      <Navbar />
+      <Box sx={{ p: 5, mt: 2, mb: 5 }}>
+        <Typography variant="h4" gutterBottom>
+          Envíanos tus preguntas
+        </Typography>
+        <Typography variant="body1" sx={{ color: "#333", mb: 2 }} gutterBottom>
+          ¿No encontraste una pregunta similar a la que buscas? No te preocupes,
+          envíanos tu ejercicio y recibirás la solución detallada en un plazo
+          máximo de 1 día hábil.
+        </Typography>
+        {error && (
+          <Typography variant="body2" color="error" gutterBottom>
+            {error}
+          </Typography>
+        )}
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <FormControl component="fieldset" sx={{ mb: 3 }}>
+              <RadioGroup
+                row
+                value={selectedOption}
+                onChange={(e) => setSelectedOption(e.target.value)}
+              >
+                <FormControlLabel
+                  value="correo"
+                  control={<Radio />}
+                  label="Correo"
                 />
+                <FormControlLabel
+                  value="whatsapp"
+                  control={<Radio />}
+                  label="WhatsApp"
+                />
+              </RadioGroup>
+            </FormControl>
+            <TextField
+              label={selectedOption === "correo" ? "Correo" : "Número WhatsApp"}
+              value={selectedOption === "correo" ? userEmail : userPhone}
+              fullWidth
+              sx={{ mb: 3 }}
+              disabled
+            />
+            <FormControl fullWidth sx={{ mb: 3 }}>
+              <Select
+                value={selectedCourse}
+                onChange={(e) => setSelectedCourse(e.target.value)}
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  Selecciona el curso
+                </MenuItem>
+                {courses.map((course) => (
+                  <MenuItem key={course.COURSE_ID} value={course.COURSE_ID}>
+                    {course.COURSE_NAME}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth sx={{ mb: 3 }}>
+              <Select
+                value={selectedLevel}
+                onChange={(e) => {
+                  const level = e.target.value;
+                  setSelectedLevel(level);
 
+                  // Lógica de precios
+                  if (level === "Colegio" || level === "Academia") {
+                    setAmount(1);
+                  } else if (level === "Instituto" || level === "Universidad") {
+                    setAmount(3);
+                  }
+                }}
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  Selecciona el nivel de estudio
+                </MenuItem>
+                <MenuItem value="Colegio">Colegio</MenuItem>
+                <MenuItem value="Instituto">Instituto</MenuItem>
+                <MenuItem value="Academia">Academia</MenuItem>
+                <MenuItem value="Universidad">Universidad</MenuItem>
+              </Select>
+            </FormControl>
 
-                <Button variant="contained" color="primary" onClick={handleSubmit}>
-                    Enviar
-                </Button>
+            <TextField
+              label="Nombre del colegio/universidad (opcional)"
+              value={schoolName}
+              onChange={(e) => setSchoolName(e.target.value)}
+              fullWidth
+              sx={{ mb: 3 }}
+            />
 
-                </Grid>
+            <TextField
+              label="Monto"
+              value={selectedLevel ? `S/ ${amount}` : "Monto a pagar"} // Muestra "Monto a pagar" si no hay nivel seleccionado
+              disabled // Campo deshabilitado
+              fullWidth
+              sx={{
+                mb: 3,
+                "& .MuiInputBase-root.Mui-disabled": {
+                  backgroundColor: "#f5f5f5", // Fondo gris claro
+                },
+              }}
+            />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              <Button
+                variant="outlined"
+                component="label"
+                sx={{
+                  bgcolor: questionUploaded ? "success.main" : "inherit",
+                  color: questionUploaded ? "white" : "inherit",
+                  border: questionUploaded
+                    ? "1px solid #4caf50"
+                    : "1px solid rgba(0, 0, 0, 0.23)",
+                  "&:hover": {
+                    bgcolor: questionUploaded
+                      ? "success.dark"
+                      : "rgba(0, 0, 0, 0.04)",
+                    border: questionUploaded
+                      ? "1px solid #43a047"
+                      : "1px solid rgba(0, 0, 0, 0.23)",
+                  },
+                  transition: "all 0.2s ease-in-out",
+                }}
+              >
+                {questionUploaded
+                  ? "Imagen adjuntada ✓"
+                  : "Adjuntar imagen de la pregunta"}
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onInput={(e) => {
+                    handleFileChange(e, "question");
+                  }}
+                />
+              </Button>
 
-                <Grid item xs={12} md={6} sx={{ textAlign: 'center' }}>
-                        <img
-                            src={logo}
-                            alt="Código QR de Yape"
-                            style={{ maxWidth: '200px', marginBottom: '20px' }}
-                        />
-                        <Typography variant="body1" gutterBottom>
-                            Escanea el código QR para realizar el pago
-                        </Typography>
-
-                        <Button variant="outlined" component="label" sx={{ mt: 2 }}>
-                            Adjuntar comprobante de pago
-                            <input type="file" hidden onChange={handleFileChange} />
-                        </Button>
-
-                        {paymentProof && (
-                            <Typography variant="body2" sx={{ mt: 2 }}>
-                                Comprobante seleccionado: {paymentProof.name}
-                            </Typography>
-                        )}
-                    </Grid>
-                </Grid>
-
-
-
-                {/* Pop-up con la información */}
-                <Dialog open={openDialog} onClose={handleCloseDialog}>
-                    <DialogTitle>¡Master Bikas al rescate de tu nota!</DialogTitle>
-                    <DialogContent>
-                        <Typography variant="body1" gutterBottom>
-                            Se enviará la solución a tu {selectedOption === 'correo' ? `Correo: ${userEmail}` : `WhatsApp: ${userPhone}`} en el transcurso de 1 hora, una vez confirmado el pago. Si no recibes respuesta en el tiempo estimado, por favor comunícate al WhatsApp: 922740657.
-                        </Typography>
-                        <Typography variant="body2" gutterBottom>
-                            Si deseas enviar más preguntas, comunícate al número 922740657. Estaremos encantados de ayudarte a resolver esas dudas que te inquietan.
-                        </Typography>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseDialog} color="primary">
-                            Cerrar
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit}
+                disabled={!whatsappOption && !paymentUploaded} // Enviar habilitado si alguna opción está activa
+              >
+                Enviar
+              </Button>
             </Box>
-        </Box>
-    );
+          </Grid>
+
+          <Grid item xs={12} md={6} sx={{ textAlign: "center" }}>
+            <img
+              src={QR}
+              alt="Código QR de Yape"
+              style={{ maxWidth: "250px", marginBottom: "20px" }}
+            />
+
+            <img
+              src={QR2}
+              alt="Código QR de Yape"
+              style={{ maxWidth: "250px", marginBottom: "20px" }}
+            />
+            <Typography variant="body1" gutterBottom>
+              Escanea el código QR para realizar el pago
+            </Typography>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                mt: 3,
+              }}
+            >
+              <Button
+                variant="outlined"
+                component="label"
+                disabled={whatsappOption} // Deshabilitar si se selecciona WhatsApp
+                sx={{
+                  mb: 2,
+                  bgcolor: paymentUploaded ? "success.main" : "inherit",
+                  color: paymentUploaded ? "white" : "inherit",
+                  border: paymentUploaded
+                    ? "1px solid #4caf50"
+                    : "1px solid rgba(0, 0, 0, 0.23)",
+                  "&:hover": {
+                    bgcolor: paymentUploaded
+                      ? "success.dark"
+                      : "rgba(0, 0, 0, 0.04)",
+                    border: paymentUploaded
+                      ? "1px solid #43a047"
+                      : "1px solid rgba(0, 0, 0, 0.23)",
+                  },
+                  transition: "all 0.2s ease-in-out",
+                }}
+              >
+                {paymentUploaded
+                  ? "Comprobante adjuntado ✓"
+                  : "Adjuntar comprobante de pago"}
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, "payment")}
+                />
+              </Button>
+
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleWhatsAppOption}
+                sx={{
+                  mt: 2,
+                  bgcolor: whatsappOption ? "success.main" : "inherit",
+                  color: whatsappOption ? "white" : "inherit",
+                  border: whatsappOption
+                    ? "1px solid #4caf50"
+                    : "1px solid rgba(0, 0, 0, 0.23)",
+                  "&:hover": {
+                    bgcolor: whatsappOption
+                      ? "success.dark"
+                      : "rgba(0, 0, 0, 0.04)",
+                    border: whatsappOption
+                      ? "1px solid #43a047"
+                      : "1px solid rgba(0, 0, 0, 0.23)",
+                  },
+                  transition: "all 0.2s ease-in-out",
+                }}
+              >
+                Enviar por WhatsApp
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+
+        <TicketDialog
+          open={openDialog}
+          onClose={handleCloseDialog}
+          ticketId={ticketId}
+          userEmail={userEmail}
+          userPhone={userPhone}
+          selectedOption={selectedOption}
+        />
+      </Box>
+    </Box>
+  );
 };
 
 export default PreguntasPersonalizadas;

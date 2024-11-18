@@ -5,7 +5,6 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import PeopleIcon from '@mui/icons-material/People';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
@@ -28,7 +27,7 @@ const AdminPanel = () => {
 
   const fetchPayments = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/payments');
+      const response = await axios.get('http://54.165.220.109:3000/api/admin/payments');
       setPayments(response.data);
     } catch (error) {
       console.error('Error al obtener los pagos:', error);
@@ -43,7 +42,7 @@ const AdminPanel = () => {
 
   const handleSaveClick = async (id) => {
     try {
-      await axios.post('http://localhost:5000/api/admin/update-payment', {
+      await axios.post('http://54.165.220.109:3000/api/admin/update-payment', {
         id,
         status: editStatus,
         amount: editAmount
@@ -85,9 +84,8 @@ const AdminPanel = () => {
             <Button color="inherit" sx={{ fontWeight: 'bold', color: '#FCFBFC' }}>Dashboard</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }}>Colegios</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }} onClick={() => navigate('/admin/coursePanel')}>Cursos</Button>
-            <Button color="inherit" sx={{ color: '#FCFBFC' }}>Temas</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }}>Supervisores</Button>
-            <Button color="inherit" sx={{ color: '#FCFBFC' }}>Problemas</Button>
+            <Button color="inherit" sx={{ color: '#FCFBFC' }} onClick={() => navigate('/admin/testimonios')}>Testimonios</Button>
             <Button color="inherit" sx={{ color: '#FCFBFC' }} onClick={() => navigate('/admin/publicidad')}>Publicidad</Button>
           </nav>
           <Box sx={{ flexGrow: 1 }} />
@@ -110,7 +108,7 @@ const AdminPanel = () => {
       </AppBar>
       <main className="flex-1 p-4 bg-[#FCFBFC]" style={{ marginTop: '50px' }}>
         <Container>
-          <Box display="grid" gridTemplateColumns={{ md: '1fr 1fr', lg: '1fr 1fr 1fr 1fr' }} gap={4}>
+          <Box display="grid" gridTemplateColumns={{ md: '1fr 1fr', lg: '1fr 1fr 1fr ' }} gap={4}>
             <Card>
               <CardHeader
                 title="Total de usuarios"
@@ -156,21 +154,7 @@ const AdminPanel = () => {
                 </Typography>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader
-                title="Ingresos totales"
-                avatar={<AttachMoneyIcon />}
-                sx={{ backgroundColor: '#fff', padding: '16px', textAlign: 'center' }}
-              />
-              <CardContent>
-                <Typography variant="h4" component="div">
-                  $125,678.90
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  +8.9% desde el mes pasado
-                </Typography>
-              </CardContent>
-            </Card>
+
           </Box>
           <Box mt={4}>
             <Card>
@@ -251,7 +235,7 @@ const AdminPanel = () => {
                 onPageChange={handleChangePage}
                 rowsPerPage={rowsPerPage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[10, 20, 30]} // Opciones de filas por página
+                rowsPerPageOptions={[10, 20, 30]} 
               />
             </Card>
           </Box>
