@@ -55,19 +55,26 @@ const TicketDialog = ({
           bgcolor: "primary.main",
           color: "white",
           display: "flex",
-          justifyContent: "space-between",
+          flexDirection: "column",
+          justifyContent: "center", 
           alignItems: "center",
+          textAlign: "center", 
         }}
       >
-        <Box display="flex" alignItems="center" gap={1}>
-          <Typography variant="h6">
+        <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
+          <Typography variant="h6" sx={{ textAlign: "center" }}>
             ¡Master Bikas al rescate de tu nota!
           </Typography>
         </Box>
         <IconButton
           aria-label="close"
           onClick={onClose}
-          sx={{ color: "white" }}
+          sx={{
+            color: "white",
+            position: "absolute", 
+            top: 8,
+            right: 8,
+          }}
         >
           <CloseIcon />
         </IconButton>
@@ -102,7 +109,7 @@ const TicketDialog = ({
               <WhatsAppIcon color="primary" />
             )}
             <Typography>
-              La solución será enviada a {" "}
+              La solución será enviada a{" "}
               <Box component="span" fontWeight="bold">
                 {selectedOption === "correo"
                   ? userEmail || "correo registrado"

@@ -1,130 +1,215 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Container, Typography, Button, Box, AppBar, Toolbar, IconButton } from '@mui/material';
-import LoginIcon from '@mui/icons-material/Login';
-import logo from '../assets/images/logo.png';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  Container,
+  Typography,
+  Button,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import axios from "axios";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 const QuestionDetail = () => {
   const { courseId, topicId, questionId } = useParams();
   const [question, setQuestion] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [answer, setAnswer] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [attempts, setAttempts] = useState(0);
-  const [isLocked, setIsLocked] = useState(true); 
+  const [isLocked, setIsLocked] = useState(true);
+  const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
-
-  // Obtener los detalles de la pregunta desde la API
   useEffect(() => {
-    const fetchQuestionDetails = async () => {
-      try {
-        const response = await axios.get(`http://54.165.220.109:3000/api/questions/${questionId}`);
-        setQuestion(response.data);
-      } catch (error) {
-        console.error('Error al obtener los detalles de la pregunta:', error);
+    const fetchInitialData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/register");
+        return;
       }
-    };
-
-    const fetchAttempts = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await axios.get('http://54.165.220.109:3000/api/users/attempts', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          setAttempts(response.data.remaining_attempts);
-        } catch (error) {
-          console.error('Error al obtener los intentos:', error);
+  
+      try {
+        // Fetch question details
+        const questionResponse = await axios.get(
+          `http://54.165.220.109:3000/api/questions/${questionId}`
+        );
+        setQuestion(questionResponse.data);
+  
+        // Check payment status for this question
+        const paymentResponse = await axios.get(
+          `http://54.165.220.109:3000/api/check-payment-status/${questionId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+  
+        if (paymentResponse.data.status === "confirmado") {
+          await fetchAnswer(); // Auto-unlock if paid
+          return;
+        }
+  
+        // Check remaining attempts
+        const attemptsResponse = await axios.get(
+          "http://54.165.220.109:3000/api/users/attempts",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setAttempts(attemptsResponse.data.remaining_attempts);
+  
+      } catch (error) {
+        if (error.response?.status === 401) {
+          alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+          navigate("/register");
+        } else if (error.response?.status === 404) {
+          console.error("La pregunta o el estado de pago no se encontró.");
+        } else {
+          console.error("Error al cargar los datos iniciales:", error);
         }
       }
     };
+  
+    fetchInitialData();
+  }, [questionId, navigate]);
+  
 
-    fetchQuestionDetails();
-    fetchAttempts();
-  }, [questionId]);
+  const fetchAnswer = async () => {
+    try {
+      const answerResponse = await axios.get(
+        `http://54.165.220.109:3000/api/answers/${questionId}`
+      );
+      setAnswer(answerResponse.data); // Save answer
+      setIsLocked(false); // Unlock content
+    } catch (error) {
+      console.error("Error al obtener la respuesta:", error);
+    }
+  };
 
   const handleUnlockContent = async () => {
-    if (isSubmitting) return; // Evitar múltiples clics
+    if (isSubmitting) return;
     setIsSubmitting(true);
-  
-    const token = localStorage.getItem('token');
+
+    const token = localStorage.getItem("token");
     if (token) {
       try {
-        const response = await axios.post('http://54.165.220.109:3000/api/users/attempts/use', {}, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
+        const response = await axios.post(
+          "http://54.165.220.109:3000/api/users/attempts/use",
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (response.data.remaining_attempts >= 0) {
-          setIsLocked(false);
           setAttempts(response.data.remaining_attempts);
+          await fetchAnswer(); // Unlock using attempts
         } else {
-          setIsLocked(true);
-          navigate('/pago');
+          setOpenDialog(true); // Show dialog if no attempts
         }
       } catch (error) {
-        console.error('Error al usar los intentos:', error);
-        if (error.response?.status === 403) navigate('/pago');
+        console.error("Error al usar los intentos:", error);
+        if (error.response?.status === 403) setOpenDialog(true);
       } finally {
-        setIsSubmitting(false); // Permitir clics de nuevo
+        setIsSubmitting(false);
       }
     } else {
-      navigate('/register');
+      navigate("/register");
       setIsSubmitting(false);
     }
   };
 
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    navigate("/pago", { state: { questionId } });
+  };
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="static" sx={{ bgcolor: '#1E494F' }}>
-        <Toolbar>
-          <img src={logo} alt="Logo" style={{ marginRight: 20, width: '50px', height: '50px' }} />
-          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            MasterBikas
-          </Typography>
-          <nav>
-            <Button color="inherit" sx={{ fontWeight: 'bold', color: '#FEFEFE' }} component={Link} to="/">Inicio</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/services">Servicios</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/about">Sobre Nosotros</Button>
-            <Button color="inherit" sx={{ color: '#FEFEFE' }} component={Link} to="/contact">Contacto</Button>
-          </nav>
-          <IconButton color="inherit">
-            <LoginIcon sx={{ color: '#FEFEFE' }} />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <Navbar />
 
       <Container sx={{ flexGrow: 1 }}>
-        <Typography variant="h4" sx={{ my: 4, textAlign: 'center', color: '#1E494F' }}>
+        <Typography
+          variant="h4"
+          sx={{ my: 4, textAlign: "center", color: "#0cc0df" }}
+        >
           {question.QUESTION_TEXT}
         </Typography>
 
         <div>
           <img
-            src={isLocked ? question.QUESTION_IMAGE : question.QUESTION_IMAGE}
-            alt="Answer"
+            src={question.QUESTION_IMAGE}
+            alt="Pregunta"
             style={{
-              width: '100%',
-              maxHeight: '400px',
-              filter: isLocked ? 'blur(10px)' : 'none',
-              transition: 'filter 0.5s ease'
+              width: "100%",
+              maxHeight: "400px",
+              transition: "filter 0.5s ease",
             }}
           />
         </div>
 
-        <Typography variant="body1" sx={{ mt: 4 }}>
-          {isLocked ? 'Este contenido está bloqueado.' : question.answer}
-        </Typography>
+        {isLocked ? (
+          <Typography variant="body1" sx={{ mt: 4 }}>
+            La respuesta está bloqueada. Usa un intento para desbloquearla.
+          </Typography>
+        ) : (
+          <div>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Respuesta:
+            </Typography>
+            <div style={{ textAlign: "center" }}>
+              <img
+                src={answer?.LINK}
+                alt="Respuesta"
+                style={{
+                  width: "100%",
+                  maxHeight: "400px",
+                  objectFit: "contain",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  padding: "8px",
+                  backgroundColor: "#f9f9f9",
+                }}
+              />
+            </div>
+          </div>
+        )}
 
-        <Button variant="outlined" color="secondary" sx={{ mt: 4 }} onClick={handleUnlockContent}>
-          Desbloquear Contenido
-        </Button>
+        {isLocked && (
+          <Button
+            onClick={handleUnlockContent}
+            disabled={isSubmitting}
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+          >
+            {isSubmitting ? "Procesando..." : "Desbloquear Contenido"}
+          </Button>
+        )}
       </Container>
 
-      <Box sx={{ bgcolor: '#1E494F', color: '#FEFEFE', textAlign: 'center', p: 2, mt: 'auto' }}>
-        <Typography variant="body2">
-          © 2024 MasterBikas. Todos los derechos reservados.
-        </Typography>
-      </Box>
+      {/* No Attempts Dialog */}
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>Sin intentos restantes</DialogTitle>
+        <DialogContent>
+          <Typography>
+            No tienes intentos restantes. Serás redirigido a la página de pago
+            para realizar el pago correspondiente.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleDialogClose}
+            color="primary"
+            variant="contained"
+          >
+            Ir al Pago
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Footer />
     </Box>
   );
 };

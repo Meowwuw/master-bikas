@@ -45,9 +45,12 @@ const UserProfileCard = () => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://54.165.220.109:3000/api/perfil", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "http://54.165.220.109:3000/api/perfil",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         const userProfile = {
           ...response.data,
@@ -102,6 +105,7 @@ const UserProfileCard = () => {
 
   const handleDepartmentChange = async (value) => {
     handleChange("DEPARTMENT", value);
+    setProfile((prev) => ({ ...prev, DEPARTMENT: value, PROVINCE: "", DISTRICT: "" }));
     try {
       const response = await axios.get(
         `http://54.165.220.109:3000/api/provinces/${value}`
@@ -114,6 +118,7 @@ const UserProfileCard = () => {
   };
 
   const handleProvinceChange = async (value) => {
+    setProfile((prev) => ({ ...prev, PROVINCE: value, DISTRICT: "" }));
     handleChange("PROVINCE", value);
     try {
       const response = await axios.get(
@@ -126,16 +131,20 @@ const UserProfileCard = () => {
   };
 
   const handleDistrictChange = async (value) => {
+    setProfile((prev) => ({ ...prev, DISTRICT: value }));
     handleChange("DISTRICT", value);
     try {
-      const response = await axios.get("http://54.165.220.109:3000/api/address-id", {
-        params: {
-          department: profile.DEPARTMENT,
-          province: profile.PROVINCE,
-          district: value,
-        },
-      });
-      handleChange("ADDRESS_ID", response.data.addressId); 
+      const response = await axios.get(
+        "http://54.165.220.109:3000/api/address-id",
+        {
+          params: {
+            department: profile.DEPARTMENT,
+            province: profile.PROVINCE,
+            district: value,
+          },
+        }
+      );
+      handleChange("ADDRESS_ID", response.data.addressId);
     } catch (error) {
       console.error("Error al obtener ADDRESS_ID:", error);
     }
@@ -144,17 +153,22 @@ const UserProfileCard = () => {
   const handleChange = (field, value) => {
     setProfile((prevProfile) => ({
       ...prevProfile,
-      [field]: value || "", 
+      [field]: value || "",
     }));
     setIsEditing(true);
   };
 
+  const isIncomplete =
+    !profile.NICKNAME ||
+    !profile.SCHOOL_NAME ||
+    !profile.DEPARTMENT ||
+    !profile.PROVINCE ||
+    !profile.DISTRICT;
+
   const formatDate = (dateString) => {
-    if (!dateString) return ""; 
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return !isNaN(date.getTime())
-      ? date.toISOString().split("T")[0] 
-      : ""; 
+    return !isNaN(date.getTime()) ? date.toISOString().split("T")[0] : "";
   };
 
   const handleUpdateProfile = async () => {
@@ -199,7 +213,14 @@ const UserProfileCard = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#FEFEFE' }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        bgcolor: "#FEFEFE",
+      }}
+    >
       <Navbar />
       <Container maxWidth="sm">
         <Card elevation={3} sx={{ p: 3 }}>
@@ -233,7 +254,7 @@ const UserProfileCard = () => {
                   fullWidth
                   value={profile.EMAIL}
                   onChange={(e) => handleChange("EMAIL", e.target.value)}
-                  disabled 
+                  disabled
                 />
               </Grid>
 
@@ -263,6 +284,19 @@ const UserProfileCard = () => {
                   onChange={(e) => handleChange("GENDER", e.target.value)}
                 />
               </Grid>
+              {/* Mostrar el mensaje si los campos no están completos */}
+              {isIncomplete && (
+                <Grid item xs={12}>
+                  <Typography
+                    variant="subtitle1"
+                    color="error"
+                    sx={{ mb: 2, textAlign: "center" }}
+                  >
+                    Completa la siguiente información y consigue 10 puntos
+                  </Typography>
+                </Grid>
+              )}
+
               <Grid item xs={12}>
                 <TextField
                   label="Apodo (Nickname)"

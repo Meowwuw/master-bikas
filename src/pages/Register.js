@@ -14,6 +14,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Link,
 } from "@mui/material";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
@@ -27,6 +28,7 @@ const images = [img1, img2, img3];
 
 const Register = () => {
   const [currentImage, setCurrentImage] = useState(0);
+  const [fade, setFade] = useState(true);
   const [username, setUsername] = useState("");
   const [lastName, setLastName] = useState("");
   const [gender, setGender] = useState("");
@@ -43,7 +45,11 @@ const Register = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImage((prevImage) => (prevImage + 1) % images.length);
+      setFade(false);
+      setTimeout(() => {
+        setCurrentImage((prevImage) => (prevImage + 1) % images.length);
+        setFade(true);
+      }, 500);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -52,6 +58,7 @@ const Register = () => {
     e.preventDefault();
     setError(null);
   
+    // Validaciones básicas
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden");
       return;
@@ -62,28 +69,45 @@ const Register = () => {
       return;
     }
   
+    if (!username || !lastName) {
+      setError("El nombre y apellido son obligatorios");
+      return;
+    }
+  
+    // Verificar datos antes de enviarlos
+    const userData = {
+      names: username,
+      lastName,
+      gender,
+      email,
+      countryCode,
+      telephone,
+      birthdate,
+      password,
+    };
+  
+    console.log("Datos enviados al backend:", userData);
+  
     try {
-      const response = await axios.post("http://54.165.220.109:3000/api/users/register", {
-        names: username,
-        lastName,
-        gender,
-        email,
-        countryCode, // Enviar el código de país como un campo separado
-        telephone, // Enviar el número de teléfono como un campo separado
-        birthdate,
-        password,
-      });
+      const response = await axios.post(
+        "http://54.165.220.109:3000/api/users/register",
+        userData
+      );
   
       if (response.status === 201) {
-        setSuccessMessage("Registro exitoso. Revisa tu correo para verificar tu cuenta.");
+        setSuccessMessage(
+          "Registro exitoso. Revisa tu correo para verificar tu cuenta."
+        );
         setTimeout(() => navigate("/login"), 3000);
       }
     } catch (error) {
-      setError(error.response?.data?.error || "Hubo un problema con el registro");
+      console.error("Error en el registro:", error);
+      setError(
+        error.response?.data?.error || "Hubo un problema con el registro"
+      );
     }
   };
   
-
   return (
     <Box
       sx={{
@@ -97,12 +121,26 @@ const Register = () => {
           sx={{
             width: "50%",
             height: "100%",
-            backgroundImage: `url(${images[currentImage]})`,
-            backgroundSize: "cover",
-            backgroundPosition: "top",
-            transition: "background-image 1s ease-in-out",
+            position: "relative",
+            overflow: "hidden",
           }}
-        />
+        >
+          <img
+            src={images[currentImage]}
+            alt={`Imagen ${currentImage + 1}`}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "top",
+              opacity: fade ? 1 : 0,
+              transition: "opacity 0.5s ease-in-out",
+              position: "absolute",
+              top: 0,
+              left: 0,
+            }}
+          />
+        </Box>
       )}
       <Container
         maxWidth="sm"
@@ -125,16 +163,25 @@ const Register = () => {
           component="form"
           onSubmit={handleRegister}
           sx={{
-            p: 4,
+            p: 2,
             borderRadius: 1,
             boxShadow: 3,
             width: "100%",
             bgcolor: "white",
           }}
         >
-          <Typography variant="h4" color="#63D9DE" gutterBottom>
-            Registro
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <Typography variant="h4" color="#63D9DE" gutterBottom>
+              Registro
+            </Typography>
+          </Box>
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -199,18 +246,15 @@ const Register = () => {
               />
             </Grid>
 
-            
-              {/* Input para seleccionar el código de país */}
-              <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={3}>
               <FormControl fullWidth margin="normal">
                 <PhoneInput
-                  country={"pe"} // País predeterminado
                   value={countryCode}
                   onChange={(phone, data) =>
                     setCountryCode(`+${data.dialCode}`)
                   }
                   inputProps={{
-                    readOnly: true, // Desactiva la escritura
+                    readOnly: true,
                   }}
                   inputStyle={{
                     width: "100%",
@@ -224,39 +268,38 @@ const Register = () => {
                     borderTopLeftRadius: "4px",
                     borderBottomLeftRadius: "4px",
                   }}
-                  placeholder="Código País"
+                  placeholder="País"
                 />
-                </FormControl>
-              </Grid>
+              </FormControl>
+            </Grid>
 
-              {/* Input para escribir el número de teléfono */}
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  fullWidth
-                  label="Número de Teléfono"
-                  margin="normal"
-                  variant="outlined"
-                  required
-                  value={telephone}
-                  onChange={(e) => setTelephone(e.target.value)}
-                  placeholder="Ingrese su número"
-                />
-              </Grid>
+            {/* Input para escribir el número de teléfono */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Número de Teléfono"
+                margin="normal"
+                variant="outlined"
+                required
+                value={telephone}
+                onChange={(e) => setTelephone(e.target.value)}
+                placeholder="Ingrese su número"
+              />
+            </Grid>
 
-              {/* Input para la Fecha de Nacimiento */}
-              <Grid item xs={12} sm={5}>
-                <TextField
-                  fullWidth
-                  label="Fecha de Nacimiento"
-                  type="date"
-                  InputLabelProps={{ shrink: true }}
-                  margin="normal"
-                  variant="outlined"
-                  value={birthdate}
-                  onChange={(e) => setBirthdate(e.target.value)}
-                />
-              </Grid>
-            
+            {/* Input para la Fecha de Nacimiento */}
+            <Grid item xs={12} sm={5}>
+              <TextField
+                fullWidth
+                label="Fecha de Nacimiento"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                margin="normal"
+                variant="outlined"
+                value={birthdate}
+                onChange={(e) => setBirthdate(e.target.value)}
+              />
+            </Grid>
 
             <Grid item xs={12} sm={6}>
               <TextField
@@ -298,6 +341,9 @@ const Register = () => {
             Registrarse
           </Button>
         </Box>
+        <Link href="/login" underline="hover" sx={{ mt: 3, color: "gray" }}>
+          ¿Tienes una cuenta? Inicia Sesión
+        </Link>
 
         <Snackbar
           open={!!successMessage}

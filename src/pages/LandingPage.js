@@ -15,11 +15,12 @@ import Navbar from "./Navbar";
 import carouselImage1 from "../assets/images/action.png";
 import carouselImage2 from "../assets/images/action2.png";
 import carouselImage3 from "../assets/images/action3.png";
+import Footer from "./Footer";
 
 const carouselItems = [
   { image: carouselImage1 },
-  { image: carouselImage2},
-  { image: carouselImage3},
+  { image: carouselImage2 },
+  { image: carouselImage3 },
 ];
 
 const services = [
@@ -43,23 +44,23 @@ const services = [
   },
 ];
 
-
 const LandingPage = () => {
   return (
     <Box sx={{ bgcolor: "#FEFEFE", minHeight: "100vh" }}>
       <Navbar />
 
       {/* Carousel */}
-      <Box sx={{ width: "100%", p: 0 }}>
+      <Box sx={{ width: "100%", height: "100vh", p: 0 }}>
         <Carousel indicators={false} navButtonsAlwaysInvisible>
           {carouselItems.map((item, index) => (
             <Box
               key={index}
               sx={{
-                height: "110vh",
-                textAlign: "center",
-                position: "relative",
                 width: "100%",
+                height: "auto",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
               <img
@@ -67,8 +68,8 @@ const LandingPage = () => {
                 alt={`Carousel ${index}`}
                 style={{
                   width: "100%",
-                  height: "100vh",
-                  objectFit: "cover",
+                  height: "auto",
+                  objectFit: "contain",
                   objectPosition: "top",
                 }}
               />
@@ -80,6 +81,7 @@ const LandingPage = () => {
                   left: "50%",
                   transform: "translate(-50%, -50%)",
                   color: "#FFFFFF",
+                  zIndex: 1,
                 }}
               >
                 {item.text}
@@ -91,7 +93,7 @@ const LandingPage = () => {
 
       {/* Quienes somos */}
       <Container maxWidth="lg" sx={{ p: 0 }}>
-        <Box sx={{ mt: 10, textAlign: "center" }}>
+        <Box sx={{ mt: 28, textAlign: "center" }}>
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
               <video
@@ -104,7 +106,7 @@ const LandingPage = () => {
             <Grid item xs={12} md={6}>
               <Typography
                 variant="h4"
-                sx={{ mb: 2, color: "#1E494F", fontWeight: "bold" }}
+                sx={{ mb: 2, color: "#0cc0df", fontWeight: "bold" }}
               >
                 Quienes somos?
               </Typography>
@@ -119,7 +121,7 @@ const LandingPage = () => {
 
         {/* Servicios */}
         <Box sx={{ mt: 10, textAlign: "center" }}>
-          <Typography variant="h4" sx={{ mb: 4, color: "#1E494F" }}>
+          <Typography variant="h4" sx={{ mb: 4, color: "#0cc0df" }}>
             Nuestros Servicios
           </Typography>
           <Grid container spacing={4}>
@@ -148,23 +150,10 @@ const LandingPage = () => {
       <Testimonials />
 
       <Box sx={{ mt: 8, textAlign: "center", color: "#306D90", p: 4 }}>
-          <Podium />
-        </Box>
-        
-      {/* Footer */}
-      <Box
-        sx={{
-          bgcolor: "#1E494F",
-          color: "#FEFEFE",
-          textAlign: "center",
-          p: 2,
-          mt: 4,
-        }}
-      >
-        <Typography variant="body2">
-          © 2024 MasterBikas. Todos los derechos reservados.
-        </Typography>
+        <Podium />
       </Box>
+
+      <Footer />
     </Box>
   );
 };

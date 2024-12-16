@@ -11,6 +11,7 @@ import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import { useNavigate } from 'react-router-dom';
 import ExportButton from './ExportButton'; 
+import Footer from './Footer'; 
 
 
 
@@ -94,7 +95,7 @@ const SupervisorPanel = () => {
   
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="static" sx={{ backgroundColor: '#1E494F' }}>
+      <AppBar position="static" sx={{ backgroundColor: '#0cc0df' }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold', color: '#FCFBFC' }}>
             Supervisor Panel
@@ -203,7 +204,7 @@ const SupervisorPanel = () => {
                       {row.hasSolution ? <CheckCircleIcon className="w-5 h-5 text-green-500" /> : <CancelIcon className="w-5 h-5 text-red-500" />}
                     </TableCell>
                     <TableCell>
-                      <MuiLink href="#" underline="hover" color="#1E494F">
+                      <MuiLink href="#" underline="hover" color="#0cc0df">
                         View
                       </MuiLink>
                     </TableCell>
@@ -213,11 +214,11 @@ const SupervisorPanel = () => {
                         size="small" 
                         startIcon={<ReportProblemIcon />} 
                         sx={{ 
-                          color: '#1E494F', 
-                          borderColor: '#1E494F',
+                          color: '#0cc0df', 
+                          borderColor: '#0cc0df',
                           backgroundColor: '#FFFFFF',
                           '&:hover': {
-                            backgroundColor: '#1E494F',
+                            backgroundColor: '#0cc0df',
                             borderColor: '#FFFFFF',
                             color:'#FFFFFF',
                           },
@@ -292,11 +293,7 @@ const SupervisorPanel = () => {
   </DialogActions>
 </Dialog>
 
-      <Box sx={{ bgcolor: '#1E494F', color: '#FEFEFE', textAlign: 'center', p: 2, mt: 'auto' }}>
-        <Typography variant="body2">
-          © 2024 MasterBikas. Todos los derechos reservados.
-        </Typography>
-      </Box>
+      <Footer />
     </Box>
   );
 };

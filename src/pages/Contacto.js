@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Typography, Grid, TextField, Button, Box } from '@mui/material';
 import Navbar from './Navbar';
+import Footer from './Footer'; 
 
 const Contacto = () => {
   const handleSubmit = (event) => {
@@ -8,10 +9,11 @@ const Contacto = () => {
   };
 
   return (
-    <Box sx={{ bgcolor: '#FEFEFE', minHeight: '100vh' }}>
+    <Box sx={{ bgcolor: "#FEFEFE", minHeight: "100vh" }}>
       <Navbar />
+      <Box sx={{ p: 5, mt: 2, mb: 5 }}>
       <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Typography variant="h4" sx={{ mb: 4, textAlign: 'center', color: '#1E494F' }}>
+        <Typography variant="h4" sx={{ mb: 4, textAlign: 'center', color: '#0cc0df' }}>
           Contacto
         </Typography>
         <Grid container spacing={4} alignItems="center">
@@ -42,6 +44,8 @@ const Contacto = () => {
           </Grid>
         </Grid>
       </Container>
+      </Box>
+      <Footer />
     </Box>
   );
 };

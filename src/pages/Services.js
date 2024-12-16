@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import Navbar from "./Navbar";
 import axios from "axios";
+import Footer from './Footer'; 
 
 const Services = () => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const Services = () => {
       <Container sx={{ flexGrow: 1 }}>
         <Typography
           variant="h4"
-          sx={{ my: 4, textAlign: "center", color: "#1E494F" }}
+          sx={{ my: 4, textAlign: "center", color: "#0cc0df" }}
         >
           Nuestros Cursos
         </Typography>
@@ -50,7 +51,14 @@ const Services = () => {
         <Grid container spacing={4}>
           {courses.map((course, index) => (
             <Grid item xs={12} md={4} key={index}>
-              <Card>
+              <Card
+                sx={{
+                  height: "100%", 
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
                 <CardContent>
                   <img
                     src={course.IMAGE_URL || "https://via.placeholder.com/150"}
@@ -77,7 +85,7 @@ const Services = () => {
                     size="small"
                     onClick={() => handleCourseClick(course)}
                     sx={{
-                      bgcolor: "#1E494F",
+                      bgcolor: "#0cc0df",
                       color: "#FFFFFF",
                       borderRadius: "20px",
                       px: 2,
@@ -95,19 +103,8 @@ const Services = () => {
           ))}
         </Grid>
       </Container>
-
-      <Box
-        sx={{
-          bgcolor: "#1E494F",
-          color: "#FEFEFE",
-          textAlign: "center",
-          p: 2,
-          mt: 4,
-        }}
-      >
-        <Typography variant="body2">
-          © 2024 MasterBikas. Todos los derechos reservados.
-        </Typography>
+      <Box sx={{ mt: 10}}>
+      <Footer />
       </Box>
     </Box>
   );

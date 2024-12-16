@@ -1,21 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Button, Container, TextField, Box, InputBase, IconButton, Card, CardHeader, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import LogoutIcon from '@mui/icons-material/Logout';
-import PeopleIcon from '@mui/icons-material/People';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import {
+  Typography,
+  Button,
+  Container,
+  TextField,
+  Box,
+  IconButton,
+  Card,
+  CardHeader,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TablePagination,
+} from "@mui/material";
+import PeopleIcon from "@mui/icons-material/People";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Navbar from "./Navbar";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
   const [payments, setPayments] = useState([]);
   const [editPaymentId, setEditPaymentId] = useState(null);
-  const [editStatus, setEditStatus] = useState('');
-  const [editAmount, setEditAmount] = useState('');
+  const [editStatus, setEditStatus] = useState("");
+  const [editAmount, setEditAmount] = useState("");
 
   // Paginación
   const [page, setPage] = useState(0);
@@ -27,10 +44,10 @@ const AdminPanel = () => {
 
   const fetchPayments = async () => {
     try {
-      const response = await axios.get('http://54.165.220.109:3000/api/admin/payments');
+      const response = await axios.get("http://54.165.220.109:3000/api/payments");
       setPayments(response.data);
     } catch (error) {
-      console.error('Error al obtener los pagos:', error);
+      console.error("Error al obtener los pagos:", error);
     }
   };
 
@@ -40,26 +57,49 @@ const AdminPanel = () => {
     setEditAmount(payment.amount);
   };
 
-  const handleSaveClick = async (id) => {
-    try {
-      await axios.post('http://54.165.220.109:3000/api/admin/update-payment', {
-        id,
-        status: editStatus,
-        amount: editAmount
-      });
-      setEditPaymentId(null);
-      fetchPayments();  // Refresh payments after update
-    } catch (error) {
-      console.error('Error al actualizar el pago:', error);
+  const handleDeleteClick = async (id) => {
+    if (window.confirm("¿Estás seguro de eliminar este pago?")) {
+      try {
+        await axios.delete(`http://54.165.220.109:3000/api/payments/${id}`);
+        fetchPayments(); // Refrescar los datos
+      } catch (error) {
+        console.error("Error al eliminar el pago:", error);
+      }
     }
   };
+
+  const handleSaveClick = async (id) => {
+    // Valores válidos según la base de datos
+    if (!["PENDIENTE", "PAGADO", "CANCELADO", "DEVOLUCION"].includes(editStatus)) {
+      alert(
+        "Estado no válido. Solo se permite PENDIENTE, PAGADO, CANCELADO o DEVOLUCION."
+      );
+      return;
+    }
+  
+    if (!editAmount || isNaN(editAmount) || parseFloat(editAmount) < 0) {
+      alert("Monto inválido. Debe ser un número positivo.");
+      return;
+    }
+  
+    try {
+      await axios.put(`http://54.165.220.109:3000/api/payments/${id}`, {
+        status: editStatus,
+        amount: parseFloat(editAmount).toFixed(3),
+      });
+      fetchPayments(); // Refrescar los datos
+      setEditPaymentId(null);
+    } catch (error) {
+      console.error("Error al guardar el pago:", error);
+    }
+  };  
 
   const handleCancelClick = () => {
     setEditPaymentId(null);
   };
 
   const handleLogout = () => {
-    navigate('/');
+    navigate("/");
   };
 
   // Cambiar la página actual
@@ -75,45 +115,23 @@ const AdminPanel = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen">
-      <AppBar position="static" sx={{ backgroundColor: '#1E494F' }}>
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold', color: '#FCFBFC' }}>
-            Admin Panel
-          </Typography>
-          <nav className="flex flex-row gap-5">
-            <Button color="inherit" sx={{ fontWeight: 'bold', color: '#FCFBFC' }}>Dashboard</Button>
-            <Button color="inherit" sx={{ color: '#FCFBFC' }}>Colegios</Button>
-            <Button color="inherit" sx={{ color: '#FCFBFC' }} onClick={() => navigate('/admin/coursePanel')}>Cursos</Button>
-            <Button color="inherit" sx={{ color: '#FCFBFC' }}>Supervisores</Button>
-            <Button color="inherit" sx={{ color: '#FCFBFC' }} onClick={() => navigate('/admin/testimonios')}>Testimonios</Button>
-            <Button color="inherit" sx={{ color: '#FCFBFC' }} onClick={() => navigate('/admin/publicidad')}>Publicidad</Button>
-          </nav>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ position: 'relative' }}>
-            <InputBase
-              placeholder="Buscar..."
-              startAdornment={<SearchIcon sx={{ marginRight: 1 }} />}
-              sx={{
-                backgroundColor: '#FCFBFC',
-                padding: '6px 8px',
-                borderRadius: '4px',
-                width: { sm: '300px', md: '200px', lg: '300px' },
-              }}
-            />
-          </Box>
-          <IconButton color="inherit" onClick={handleLogout}>
-            <LogoutIcon sx={{ color: '#FCFBFC' }} />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <main className="flex-1 p-4 bg-[#FCFBFC]" style={{ marginTop: '50px' }}>
+      <Navbar />
+      <main className="flex-1 p-4 bg-[#FCFBFC]" style={{ marginTop: "50px" }}>
         <Container>
-          <Box display="grid" gridTemplateColumns={{ md: '1fr 1fr', lg: '1fr 1fr 1fr ' }} gap={4}>
+          <Box
+            display="grid"
+            gridTemplateColumns={{ md: "1fr 1fr", lg: "1fr 1fr 1fr " }}
+            gap={4}
+          >
             <Card>
               <CardHeader
                 title="Total de usuarios"
                 avatar={<PeopleIcon />}
-                sx={{ backgroundColor: '#fff', padding: '16px', textAlign: 'center' }}
+                sx={{
+                  backgroundColor: "#fff",
+                  padding: "16px",
+                  textAlign: "center",
+                }}
               />
               <CardContent>
                 <Typography variant="h4" component="div">
@@ -128,7 +146,11 @@ const AdminPanel = () => {
               <CardHeader
                 title="Cursos mas visitados"
                 avatar={<InventoryIcon />}
-                sx={{ backgroundColor: '#fff', padding: '16px', textAlign: 'center' }}
+                sx={{
+                  backgroundColor: "#fff",
+                  padding: "16px",
+                  textAlign: "center",
+                }}
               />
               <CardContent>
                 <Typography variant="h4" component="div">
@@ -143,7 +165,11 @@ const AdminPanel = () => {
               <CardHeader
                 title="Cursos mas comprado"
                 avatar={<ShoppingCartIcon />}
-                sx={{ backgroundColor: '#fff', padding: '16px', textAlign: 'center' }}
+                sx={{
+                  backgroundColor: "#fff",
+                  padding: "16px",
+                  textAlign: "center",
+                }}
               />
               <CardContent>
                 <Typography variant="h4" component="div">
@@ -154,7 +180,6 @@ const AdminPanel = () => {
                 </Typography>
               </CardContent>
             </Card>
-
           </Box>
           <Box mt={4}>
             <Card>
@@ -171,7 +196,10 @@ const AdminPanel = () => {
                   </TableHead>
                   <TableBody>
                     {payments
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
                       .map((payment) => (
                         <TableRow key={payment.id}>
                           <TableCell>{payment.id}</TableCell>
@@ -184,8 +212,10 @@ const AdminPanel = () => {
                                 select
                                 SelectProps={{ native: true }}
                               >
-                                <option value="pendiente">Pendiente</option>
-                                <option value="confirmado">Confirmado</option>
+                                <option value="PENDIENTE">Pendiente</option>
+                                <option value="PAGADO">Pagado</option>
+                                <option value="CANCELADO">Cancelado</option>
+                                <option value="DEVOLUCION">Devolución</option>
                               </TextField>
                             ) : (
                               payment.status
@@ -198,24 +228,37 @@ const AdminPanel = () => {
                                 onChange={(e) => setEditAmount(e.target.value)}
                                 type="number"
                               />
+                            ) : payment.amount !== null &&
+                              payment.amount !== undefined ? (
+                              parseFloat(payment.amount).toFixed(2)
                             ) : (
-                              payment.amount !== null && payment.amount !== undefined
-                                ? parseFloat(payment.amount).toFixed(2)
-                                : 'N/A'
+                              "N/A"
                             )}
                           </TableCell>
                           <TableCell align="right">
                             {editPaymentId === payment.id ? (
                               <>
-                                <Button onClick={() => handleSaveClick(payment.id)}>Guardar</Button>
-                                <Button onClick={handleCancelClick}>Cancelar</Button>
+                                <Button
+                                  onClick={() => handleSaveClick(payment.id)}
+                                >
+                                  Guardar
+                                </Button>
+                                <Button onClick={handleCancelClick}>
+                                  Cancelar
+                                </Button>
                               </>
                             ) : (
                               <>
-                                <IconButton size="small" onClick={() => handleEditClick(payment)}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleEditClick(payment)}
+                                >
                                   <EditIcon />
                                 </IconButton>
-                                <IconButton size="small">
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleDeleteClick(payment.id)}
+                                >
                                   <DeleteIcon />
                                 </IconButton>
                               </>
@@ -235,7 +278,7 @@ const AdminPanel = () => {
                 onPageChange={handleChangePage}
                 rowsPerPage={rowsPerPage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[10, 20, 30]} 
+                rowsPerPageOptions={[10, 20, 30]}
               />
             </Card>
           </Box>

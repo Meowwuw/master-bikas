@@ -32,34 +32,40 @@ const Testimonials = () => {
       <Box sx={{ mt: 4 }}>
         <Typography
           variant="h4"
-          sx={{ mb: 4, textAlign: "center", color: "#1E494F" }}
+          sx={{ mb: 4, textAlign: "center", color: "#0cc0df" }}
         >
           Testimonios
         </Typography>
         <Grid container spacing={4}>
           {testimonials.map((testimonial) => (
             <Grid item xs={12} md={4} key={testimonial.TESTIMONIAL_ID}>
-              <Card>
+              <Card
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
                 <CardContent>
                   <Typography
                     variant="h6"
-                    sx={{ mt: 2, fontWeight: "bold", color: "#1E494F" }}
+                    sx={{ mt: 2, fontWeight: "bold", color: "#0cc0df" }}
                   >
-                    {testimonial.user_name}{" "}
-                    {/* Muestra el nombre del usuario */}
+                    {testimonial.user_name}
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 2, color: "#666" }}>
                     {testimonial.CONTENT}
                   </Typography>
-                  <Box sx={{ mt: 2, textAlign: "center" }}>
-                    <Rating
-                      name="rating"
-                      value={testimonial.RATING}
-                      readOnly
-                      precision={0.5}
-                    />
-                  </Box>
                 </CardContent>
+                <Box sx={{ mt: 2, textAlign: "center", pb: 2 }}>
+                  <Rating
+                    name="rating"
+                    value={testimonial.RATING}
+                    readOnly
+                    precision={0.5}
+                  />
+                </Box>
               </Card>
             </Grid>
           ))}

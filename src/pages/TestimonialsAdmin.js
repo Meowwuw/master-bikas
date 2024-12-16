@@ -129,7 +129,7 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="flex flex-col w-full min-h-screen">
-      <AppBar position="static" sx={{ backgroundColor: "#1E494F" }}>
+      <AppBar position="static" sx={{ backgroundColor: "#0cc0df" }}>
         <Toolbar>
           <Link to="/admin" style={{ textDecoration: "none" }}>
             <Typography

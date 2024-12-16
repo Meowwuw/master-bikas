@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import TicketDialog from "./TicketDialog";
 import QR from "../assets/images/QR.jpeg";
 import QR2 from "../assets/images/QR2.jpeg";
+import Footer from "./Footer";
 import {
   Typography,
   TextField,
@@ -16,6 +17,7 @@ import {
   Select,
   MenuItem,
   Grid,
+  Autocomplete,
 } from "@mui/material";
 import axios from "axios";
 
@@ -44,12 +46,9 @@ const PreguntasPersonalizadas = () => {
 
       const fetchUserData = async () => {
         try {
-          const response = await axios.get(
-            "http://54.165.220.109:3000/api/perfil",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
+          const response = await axios.get("http://54.165.220.109:3000/api/perfil", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           setUserPhone(response.data.TELEPHONE || "");
           setUserEmail(response.data.EMAIL || "");
         } catch (error) {
@@ -62,9 +61,7 @@ const PreguntasPersonalizadas = () => {
 
     const fetchCourses = async () => {
       try {
-        const response = await axios.get(
-          "http://54.165.220.109:3000/api/courses"
-        );
+        const response = await axios.get("http://54.165.220.109:3000/api/courses");
         setCourses(response.data);
       } catch (error) {
         console.error("Error al obtener los cursos:", error);
@@ -97,67 +94,23 @@ const PreguntasPersonalizadas = () => {
   };
 
   const handleWhatsAppOption = async () => {
+    console.log("Iniciando envío por WhatsApp...");
     setWhatsappOption(true);
     setPaymentProof(null);
     setPaymentUploaded(false);
-
-    // Datos a enviar al backend
+  
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post(
-        "http://54.165.220.109:3000/api/pregunta",
-        {
-          COURSE_ID: selectedCourse,
-          SCHOOL_CATEGORY: selectedLevel,
-          SCHOOL_NAME: schoolName,
-          CUSTOM_QUESTION_URL: null,
-          CUSTOM_PAYMENT_URL: null,
-          WHATSAPP_OPTION: true,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const ticketId = response.data.ticketId;
-
-      // Redirigir a WhatsApp
-      const message = encodeURIComponent(
-        `Hola, tengo una consulta personalizada. Mi ticket es ${ticketId}. Por favor, ayúdenme con más información.`
-      );
-      const whatsappUrl = `https://wa.me/${
-        userPhone || "000000000"
-      }?text=${message}`;
-      window.open(whatsappUrl, "_blank");
-
-      setTicketId(ticketId);
-      setOpenDialog(true);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error al enviar la pregunta por WhatsApp:", error);
-      setError("No se pudo enviar la consulta. Intenta de nuevo.");
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!questionImage && !whatsappOption) {
-      setError(
-        "Por favor, adjunta una imagen de la pregunta o elige enviar por WhatsApp."
-      );
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
+      console.log("Token obtenido:", token);
+  
       let questionImageUrl = null;
-
+  
+      // Subir la imagen de la pregunta si existe
       if (questionImage) {
-        // Subir la imagen de la pregunta
+        console.log("Subiendo imagen de la pregunta...");
         const questionFormData = new FormData();
         questionFormData.append("file", questionImage);
+  
         const questionUploadResponse = await axios.post(
           "http://54.165.220.109:3000/api/upload-question",
           questionFormData,
@@ -168,20 +121,172 @@ const PreguntasPersonalizadas = () => {
             },
           }
         );
+  
+        console.log(
+          "Respuesta del backend (upload-question):",
+          questionUploadResponse.data
+        );
+        questionImageUrl = questionUploadResponse.data.url;
+      }
+  
+      console.log("URL de la imagen de la pregunta:", questionImageUrl);
+  
+      // Manejo de COURSE_ID y USER_COURSE
+      let courseId = null;
+      let userCourse = null;
+  
+      if (typeof selectedCourse === "string") {
+        // Curso personalizado
+        userCourse = selectedCourse;
+      } else if (selectedCourse?.COURSE_ID) {
+        // Curso existente
+        courseId = selectedCourse.COURSE_ID;
+      }
+  
+      // Crear el payload con la URL de la imagen
+      const payload = {
+        COURSE_ID: courseId,
+        USER_COURSE: userCourse,
+        SCHOOL_CATEGORY: selectedLevel,
+        SCHOOL_NAME: schoolName,
+        CUSTOM_QUESTION_URL: questionImageUrl,
+        CUSTOM_PAYMENT_URL: null,
+        WHATSAPP_OPTION: true,
+      };
+  
+      console.log("Datos enviados al backend (WhatsApp):", payload);
+  
+      const response = await axios.post(
+        "http://54.165.220.109:3000/api/pregunta",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      console.log("Respuesta del backend (WhatsApp):", response.data);
+  
+      const ticketId = response.data.ticketId;
+      console.log("Ticket generado:", ticketId);
+  
+      // Redirigir a WhatsApp
+      const message = encodeURIComponent(
+        `Hola, tengo una consulta personalizada. Mi ticket es ${ticketId}. Por favor, ayúdenme con más información.`
+      );
+      const whatsappUrl = `https://wa.me/51921346549?text=${message}`;
+      console.log("URL de WhatsApp:", whatsappUrl);
+  
+      window.open(whatsappUrl, "_blank");
+      setTicketId(ticketId);
+      setOpenDialog(true);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error al enviar la pregunta por WhatsApp:", error);
+      setError("No se pudo enviar la consulta. Intenta de nuevo.");
+    }
+  };
+  
+
+  const handleSubmit = async () => {
+    console.log("Iniciando envío del formulario...");
+
+    if (!questionImage && !whatsappOption && !paymentProof) {
+      console.error("Error: Ningún archivo o opción seleccionada.");
+      setError(
+        "Por favor, adjunta una imagen de la pregunta, un comprobante de pago, o elige enviar por WhatsApp."
+      );
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token obtenido:", token);
+
+      let questionImageUrl = null;
+      let paymentProofUrl = null;
+
+      // Subir la imagen de la pregunta si existe
+      if (questionImage) {
+        console.log("Subiendo imagen de la pregunta...");
+        const questionFormData = new FormData();
+        questionFormData.append("file", questionImage);
+
+        const questionUploadResponse = await axios.post(
+          "http://54.165.220.109:3000/api/upload-question",
+          questionFormData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log(
+          "Respuesta del backend (upload-question):",
+          questionUploadResponse.data
+        );
         questionImageUrl = questionUploadResponse.data.url;
       }
 
+      // Subir el comprobante de pago si existe
+      if (paymentProof) {
+        console.log("Subiendo comprobante de pago...");
+        const paymentFormData = new FormData();
+        paymentFormData.append("file", paymentProof);
+
+        const paymentUploadResponse = await axios.post(
+          "http://54.165.220.109:3000/api/upload-payment-proof",
+          paymentFormData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log(
+          "Respuesta del backend (upload-payment-proof):",
+          paymentUploadResponse.data
+        );
+        paymentProofUrl = paymentUploadResponse.data.url;
+      }
+
+      console.log("Valor de selectedCourse antes del manejo:", selectedCourse);
+      console.log("Tipo de selectedCourse:", typeof selectedCourse);
+
+      // Manejo de COURSE_ID y USER_COURSE
+      let courseId = null;
+      let userCourse = null;
+
+      if (typeof selectedCourse === "string") {
+        // Curso personalizado
+        userCourse = selectedCourse;
+      } else if (selectedCourse?.COURSE_ID) {
+        // Curso existente
+        courseId = selectedCourse.COURSE_ID;
+      }
+
       // Enviar los datos al backend
+      const payload = {
+        COURSE_ID: courseId,
+        USER_COURSE: userCourse,
+        SCHOOL_CATEGORY: selectedLevel,
+        SCHOOL_NAME: schoolName,
+        CUSTOM_QUESTION_URL: questionImageUrl,
+        CUSTOM_PAYMENT_URL: paymentProofUrl,
+        WHATSAPP_OPTION: whatsappOption,
+      };
+
+      console.log("Datos enviados al backend (pregunta):", payload);
+
       const response = await axios.post(
         "http://54.165.220.109:3000/api/pregunta",
-        {
-          COURSE_ID: selectedCourse,
-          SCHOOL_CATEGORY: selectedLevel,
-          SCHOOL_NAME: schoolName,
-          CUSTOM_QUESTION_URL: questionImageUrl,
-          CUSTOM_PAYMENT_URL: null,
-          WHATSAPP_OPTION: whatsappOption,
-        },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -190,8 +295,10 @@ const PreguntasPersonalizadas = () => {
         }
       );
 
+      console.log("Respuesta del backend (pregunta):", response.data);
+
       setTicketId(response.data.ticketId);
-      setOpenDialog(true); // Abre el diálogo de confirmación
+      setOpenDialog(true);
     } catch (error) {
       console.error("Error al enviar la pregunta:", error);
       setError("Error al enviar la pregunta. Por favor, intenta nuevamente.");
@@ -212,8 +319,8 @@ const PreguntasPersonalizadas = () => {
         </Typography>
         <Typography variant="body1" sx={{ color: "#333", mb: 2 }} gutterBottom>
           ¿No encontraste una pregunta similar a la que buscas? No te preocupes,
-          envíanos tu ejercicio y recibirás la solución detallada en un plazo
-          máximo de 1 día hábil.
+          envíanos tu ejercicio y<br></br>recibirásla solución detallada en un
+          plazo máximo de 1 día hábil.
         </Typography>
         {error && (
           <Typography variant="body2" color="error" gutterBottom>
@@ -248,21 +355,37 @@ const PreguntasPersonalizadas = () => {
               disabled
             />
             <FormControl fullWidth sx={{ mb: 3 }}>
-              <Select
-                value={selectedCourse}
-                onChange={(e) => setSelectedCourse(e.target.value)}
-                displayEmpty
-              >
-                <MenuItem value="" disabled>
-                  Selecciona el curso
-                </MenuItem>
-                {courses.map((course) => (
-                  <MenuItem key={course.COURSE_ID} value={course.COURSE_ID}>
-                    {course.COURSE_NAME}
-                  </MenuItem>
-                ))}
-              </Select>
+            <Autocomplete
+  options={courses}
+  getOptionLabel={(option) =>
+    typeof option === "string" ? option : option?.COURSE_NAME || ""
+  }
+  value={selectedCourse}
+  onChange={(event, newValue) => {
+    if (typeof newValue === "string") {
+      // El usuario escribió un curso personalizado
+      setSelectedCourse(newValue);
+    } else if (newValue && newValue.COURSE_NAME) {
+      // El usuario seleccionó un curso existente
+      setSelectedCourse(newValue);
+    } else {
+      // Vaciar el valor si el usuario borra el texto
+      setSelectedCourse("");
+    }
+  }}
+  onInputChange={(event, newInputValue) => {
+    // Actualizar el estado mientras el usuario escribe
+    setSelectedCourse(newInputValue);
+  }}
+  renderInput={(params) => (
+    <TextField {...params} label="Selecciona o escribe un curso" variant="outlined" />
+  )}
+  freeSolo
+  fullWidth
+/>
+
             </FormControl>
+
             <FormControl fullWidth sx={{ mb: 3 }}>
               <Select
                 value={selectedLevel}
@@ -290,7 +413,7 @@ const PreguntasPersonalizadas = () => {
             </FormControl>
 
             <TextField
-              label="Nombre del colegio/universidad (opcional)"
+              label="Nombre de la institución educativa (opcional)"
               value={schoolName}
               onChange={(e) => setSchoolName(e.target.value)}
               fullWidth
@@ -299,13 +422,12 @@ const PreguntasPersonalizadas = () => {
 
             <TextField
               label="Monto"
-              value={selectedLevel ? `S/ ${amount}` : "Monto a pagar"} // Muestra "Monto a pagar" si no hay nivel seleccionado
-              disabled // Campo deshabilitado
+              value={selectedLevel ? `S/ ${amount}` : "Monto a pagar"}
               fullWidth
               sx={{
                 mb: 3,
                 "& .MuiInputBase-root.Mui-disabled": {
-                  backgroundColor: "#f5f5f5", // Fondo gris claro
+                  backgroundColor: "#f5f5f5",
                 },
               }}
             />
@@ -354,7 +476,7 @@ const PreguntasPersonalizadas = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleSubmit}
-                disabled={!whatsappOption && !paymentUploaded} // Enviar habilitado si alguna opción está activa
+                disabled={!whatsappOption && !paymentUploaded}
               >
                 Enviar
               </Button>
@@ -388,7 +510,7 @@ const PreguntasPersonalizadas = () => {
               <Button
                 variant="outlined"
                 component="label"
-                disabled={whatsappOption} // Deshabilitar si se selecciona WhatsApp
+                disabled={whatsappOption}
                 sx={{
                   mb: 2,
                   bgcolor: paymentUploaded ? "success.main" : "inherit",
@@ -455,6 +577,7 @@ const PreguntasPersonalizadas = () => {
           selectedOption={selectedOption}
         />
       </Box>
+      <Footer />
     </Box>
   );
 };

@@ -239,7 +239,7 @@ const CoursePanel = () => {
       {/* Navbar */}
       <AppBar
         position="fixed"
-        sx={{ backgroundColor: "#1E494F", zIndex: 1201 }}
+        sx={{ backgroundColor: "#0cc0df", zIndex: 1201 }}
       >
         <Toolbar>
           <Link to="/admin" style={{ textDecoration: "none" }}>

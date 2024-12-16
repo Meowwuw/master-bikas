@@ -20,11 +20,11 @@ const DotPagination = ({ count, page, onChange }) => {
             height: 12,
             borderRadius: '50%',
             margin: '0 4px',
-            backgroundColor: page === index + 1 ? '#1E494F' : '#E0E0E0',
+            backgroundColor: page === index + 1 ? '#0cc0df' : '#E0E0E0',
             cursor: 'pointer',
             transition: 'background-color 0.3s',
             '&:hover': {
-              backgroundColor: page === index + 1 ? '#1E494F' : '#BDBDBD',
+              backgroundColor: page === index + 1 ? '#0cc0df' : '#BDBDBD',
             },
           }}
         />

@@ -77,7 +77,7 @@ const Publicidad = () => {
           pb: 7,
           textAlign: "center",
           bgcolor: "#c5d9db",
-          color: "#1E494F",
+          color: "#0cc0df",
           width: "100%",
         }}
       >
@@ -98,8 +98,8 @@ const Publicidad = () => {
         mt: 14,
         pb: 7,
         textAlign: "center",
-        bgcolor: "#c5d9db",
-        color: "#1E494F",
+        bgcolor: "#a8e3ed",
+        color: "#03343c",
         width: "100%",
       }}
     >

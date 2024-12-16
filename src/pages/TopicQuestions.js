@@ -17,10 +17,10 @@ import axios from "axios";
 import Navbar from "./Navbar";
 
 const TopicQuestions = () => {
-  const { courseId } = useParams(); // Obtener el ID del curso desde la URL
+  const { courseId } = useParams(); 
   const [topics, setTopics] = useState([]);
-  const [loading, setLoading] = useState(true); // Estado para mostrar un spinner mientras carga
-  const navigate = useNavigate(); // Navegar entre rutas
+  const [loading, setLoading] = useState(true); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchTopics = async () => {
@@ -29,11 +29,11 @@ const TopicQuestions = () => {
           `http://54.165.220.109:3000/api/courses/${courseId}/topics`
         );
 
-        setTopics(response.data || []); // Guardar los temas en el estado
+        setTopics(response.data || []); 
       } catch (error) {
         console.error("Error al obtener los temas:", error);
       } finally {
-        setLoading(false); // Desactivar el spinner después de cargar
+        setLoading(false); 
       }
     };
 
@@ -46,7 +46,6 @@ const TopicQuestions = () => {
       const questions = response.data;
   
       if (questions.length > 0) {
-        // Asegúrate de que estás obteniendo el `QUESTION_ID` correcto
         const firstQuestionId = questions[0].QUESTION_ID;
         navigate(`/course/${courseId}/topic/${topicId}/questions/${firstQuestionId}`);
       } else {
@@ -64,7 +63,7 @@ const TopicQuestions = () => {
       <Container sx={{ flexGrow: 1, mt: 4 }}>
         <Typography
           variant="h4"
-          sx={{ my: 4, textAlign: "center", color: "#1E494F" }}
+          sx={{ my: 4, textAlign: "center", color: "#0cc0df" }}
         >
           Temas del Curso
         </Typography>
@@ -88,7 +87,7 @@ const TopicQuestions = () => {
                 <TableRow>
                   <TableCell
                     sx={{
-                      bgcolor: "#407c85",
+                      bgcolor: "#0cc0df",
                       color: "#FFFFFF",
                       textAlign: "center",
                       fontWeight: "bold",
@@ -125,7 +124,7 @@ const TopicQuestions = () => {
 
       <Box
         sx={{
-          bgcolor: "#1E494F",
+          bgcolor: "#0cc0df",
           color: "#FEFEFE",
           textAlign: "center",
           p: 2,
