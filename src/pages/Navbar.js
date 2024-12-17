@@ -99,13 +99,23 @@ const Navbar = () => {
   return (
     <AppBar position="sticky" sx={{ bgcolor: "#0cc0df" }}>
       <Toolbar>
-        <img
-          src={logo}
-          alt="Logo"
-          style={{ marginRight: 20, width: "50px", height: "50px" }}
-        />
-        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "bold" ,color:"#ffffff"}}>
-        </Typography>
+        <Link to="/" style={{ textDecoration: "none" }}>
+          <img
+            src={logo}
+            alt="Logo"
+            style={{
+              marginRight: 20,
+              width: "50px",
+              height: "50px",
+              cursor: "pointer",
+            }}
+          />
+        </Link>
+
+        <Typography
+          variant="h6"
+          sx={{ flexGrow: 1, fontWeight: "bold", color: "#ffffff" }}
+        ></Typography>
         <nav>
           <Button
             color="inherit"
@@ -117,7 +127,7 @@ const Navbar = () => {
           </Button>
           <Button
             color="inherit"
-            sx={{ color: "#ffffff" }}
+            sx={{ fontWeight: "bold", color: "#ffffff" }}
             component={Link}
             to="/services"
           >
@@ -132,9 +142,10 @@ const Navbar = () => {
             <Button
               color="inherit"
               sx={{
-                color: "#ffffff"
+                color: "#ffffff",
+                fontWeight: "bold",
               }}
-              onClick={() => navigate("/preguntas-personalizadas")} 
+              onClick={() => navigate("/preguntas-personalizadas")}
               ref={(node) => {
                 if (node && !dropdownAnchorEl) {
                   setDropdownAnchorEl(node);
@@ -167,6 +178,7 @@ const Navbar = () => {
                         }}
                         sx={{
                           color: "#ffffff",
+                          fontWeight: "bold",
                           textTransform: "uppercase",
                           "&:hover": {
                             bgcolor: "#3FD5EC",
@@ -185,7 +197,7 @@ const Navbar = () => {
 
           <Button
             color="inherit"
-            sx={{ color: "#ffffff" }}
+            sx={{ fontWeight: "bold", color: "#ffffff" }}
             component={Link}
             to="/about"
           >
@@ -193,7 +205,7 @@ const Navbar = () => {
           </Button>
           <Button
             color="inherit"
-            sx={{ color: "#ffffff" }}
+            sx={{ fontWeight: "bold", color: "#ffffff" }}
             component={Link}
             to="/contact"
           >
@@ -203,14 +215,18 @@ const Navbar = () => {
 
         {username ? (
           <>
-            <Typography sx={{ color: "#ffffff", marginRight: "10px" }}>
+            <Typography
+              sx={{ color: "#ffffff", fontWeight: "bold", marginRight: "10px" }}
+            >
               Hola, {username}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <IconButton onClick={handleMenuClick}>
                 <Avatar src={osoIcon} alt="Oso" />
               </IconButton>
-              <Typography sx={{ color: "#ffffff", marginLeft: "8px" }}>
+              <Typography
+                sx={{ color: "#ffffff", fontWeight: "bold", marginLeft: "8px" }}
+              >
                 {points} pts
               </Typography>
             </Box>

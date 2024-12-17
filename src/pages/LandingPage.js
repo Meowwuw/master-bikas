@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Container,
   Typography,
@@ -25,21 +25,21 @@ const carouselItems = [
 
 const services = [
   {
-    title: "Tutoría de Matemáticas",
-    description:
-      "Nuestros tutores expertos brindan apoyo personalizado para ayudar a los estudiantes a sobresalir en matemáticas.",
-    icon: "📘",
-  },
-  {
     title: "Videos de Matemáticas",
     description:
-      "Videos de matemáticas interactivos y atractivos para ayudar a los estudiantes a entender conceptos complejos.",
+      "¡Aprender matemáticas nunca fue tan entretenido! Descubre videos interactivos y dinámicos en nuestro TikTok @MasterBikas, donde hacemos que los conceptos más complejos sean fáciles y divertidos de entender. ¡Síguenos y disfruta aprendiendo!",
     icon: "📹",
+  },
+  {
+    title: "Tutoría de Matemáticas",
+    description:
+      "Envía tus preguntas y recibe soluciones personalizadas explicadas paso a paso. Nuestros tutores expertos se enfocan en tus necesidades para que aprendas de manera rápida y efectiva. Aprende a tu ritmo y alcanza tus objetivos con nuestro apoyo personalizado.",
+    icon: "📘",
   },
   {
     title: "Recursos de Matemáticas",
     description:
-      "Recursos de matemáticas completos, incluyendo hojas de trabajo, actividades y pruebas de práctica.",
+      "Encuentra respuestas detalladas a tus dudas, participa en preguntas semanales y acumula puntos para ganar increíbles premios. Aprende mientras te diviertes con recursos diseñados especialmente para que domines las matemáticas y seas recompensado por tu esfuerzo.",
     icon: "📚",
   },
 ];
@@ -108,12 +108,13 @@ const LandingPage = () => {
                 variant="h4"
                 sx={{ mb: 2, color: "#0cc0df", fontWeight: "bold" }}
               >
-                Quienes somos?
+                ¿Quienes somos?
               </Typography>
               <Typography variant="body1" color="textSecondary">
-                MasterBikas ha construido una red robusta y global de
-                estudiantes, educadores y profesionales que están comprometidos
-                con el aprendizaje continuo.
+                Impulsamos el aprendizaje en todo el Perú, ayudando a
+                estudiantes a resolver dudas, fortalecer sus conocimientos y
+                alcanzar sus metas académicas con herramientas personalizadas,
+                preguntas desafiantes y recompensas motivadoras.
               </Typography>
             </Grid>
           </Grid>
@@ -122,13 +123,28 @@ const LandingPage = () => {
         {/* Servicios */}
         <Box sx={{ mt: 10, textAlign: "center" }}>
           <Typography variant="h4" sx={{ mb: 4, color: "#0cc0df" }}>
-            Nuestros Servicios
+            NUESTROS SERVICIOS
           </Typography>
           <Grid container spacing={4}>
             {services.map((service, index) => (
               <Grid item xs={12} md={4} key={index}>
-                <Card>
-                  <CardContent>
+                <Card
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    height: "100%", 
+                  }}
+                >
+                  <CardContent
+                    sx={{
+                      flexGrow: 1, 
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
                     <Typography variant="h5" component="div" sx={{ mb: 2 }}>
                       {service.icon} {service.title}
                     </Typography>

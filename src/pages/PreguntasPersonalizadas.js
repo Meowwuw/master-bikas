@@ -98,6 +98,25 @@ const PreguntasPersonalizadas = () => {
     setWhatsappOption(true);
     setPaymentProof(null);
     setPaymentUploaded(false);
+
+    // Validaciones específicas antes de enviar
+  if (!questionImage) {
+    console.error("Error: Falta adjuntar la imagen de la pregunta.");
+    setError("Por favor, adjunta la imagen de la pregunta antes de continuar.");
+    return;
+  }
+
+  if (!selectedCourse) {
+    console.error("Error: No se seleccionó un curso.");
+    setError("Por favor, selecciona un curso antes de enviar la consulta.");
+    return;
+  }
+
+  if (!selectedLevel || !schoolName) {
+    console.error("Error: Datos incompletos (nivel escolar o nombre de la escuela).");
+    setError("Por favor, completa el nivel escolar y el nombre de la escuela.");
+    return;
+  }
   
     try {
       const token = localStorage.getItem("token");
@@ -193,11 +212,32 @@ const PreguntasPersonalizadas = () => {
   const handleSubmit = async () => {
     console.log("Iniciando envío del formulario...");
 
+    // Validaciones específicas
     if (!questionImage && !whatsappOption && !paymentProof) {
       console.error("Error: Ningún archivo o opción seleccionada.");
       setError(
         "Por favor, adjunta una imagen de la pregunta, un comprobante de pago, o elige enviar por WhatsApp."
       );
+      return;
+    }
+  
+    if (paymentProof && !questionImage) {
+      console.error("Error: Se adjuntó comprobante, pero falta la imagen de la pregunta.");
+      setError(
+        "Por favor, adjunta la imagen de la pregunta antes de enviar el comprobante de pago."
+      );
+      return;
+    }
+  
+    if (!selectedCourse) {
+      console.error("Error: No se seleccionó un curso.");
+      setError("Por favor, selecciona un curso antes de enviar la consulta.");
+      return;
+    }
+
+    if (!selectedLevel || !schoolName) {
+      console.error("Error: Datos incompletos (nivel escolar o nombre de la escuela).");
+      setError("Por favor, completa el nivel escolar y el nombre de la escuela.");
       return;
     }
 

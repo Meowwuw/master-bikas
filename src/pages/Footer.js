@@ -19,7 +19,7 @@ const Footer = () => {
         alignItems: 'center',
       }}
     >
-      <Typography variant="body2" sx={{ mb: 1 }}>
+      <Typography variant="body2" sx={{ mb: 1, fontWeight:"bold"}}>
         © 2024 MasterBikas. Todos los derechos reservados.
       </Typography>
       <Box>

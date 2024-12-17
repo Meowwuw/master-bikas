@@ -54,7 +54,7 @@ const UserProfileCard = () => {
 
         const userProfile = {
           ...response.data,
-          BIRTHDATE: response.data.BIRTHDATE || "", // Asigna una cadena vacía si no hay fecha
+          BIRTHDATE: response.data.BIRTHDATE || "", 
           NICKNAME: response.data.NICKNAME || "",
           SCHOOL_NAME: response.data.SCHOOL_NAME || "",
           DEPARTMENT: response.data.DEPARTMENT || "",
@@ -176,33 +176,16 @@ const UserProfileCard = () => {
       setError("Por favor selecciona un Departamento, Provincia y Distrito.");
       return;
     }
-
+  
     try {
       const token = localStorage.getItem("token");
+      // Actualizar el perfil
       await axios.put(
         "http://54.165.220.109:3000/api/perfil",
         { ...profile },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      const allFieldsComplete =
-        profile.NAMES &&
-        profile.LAST_NAME &&
-        profile.EMAIL &&
-        profile.TELEPHONE &&
-        profile.BIRTHDATE &&
-        profile.GENDER &&
-        profile.SCHOOL_NAME &&
-        profile.ADDRESS_ID;
-
-      if (allFieldsComplete) {
-        await axios.put(
-          "http://54.165.220.109:3000/api/perfil/add-points",
-          { points: 10 },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
-
+  
       setSuccess("Perfil actualizado correctamente.");
       setError("");
       setIsEditing(false);
@@ -211,7 +194,7 @@ const UserProfileCard = () => {
       setError("No se pudo actualizar el perfil.");
     }
   };
-
+  
   return (
     <Box
       sx={{
@@ -236,7 +219,7 @@ const UserProfileCard = () => {
                 <TextField
                   label="Nombres"
                   fullWidth
-                  value={profile.NAMES || ""} // Valor por defecto en caso de undefined
+                  value={profile.NAMES || ""} 
                   onChange={(e) => handleChange("NAMES", e.target.value)}
                 />
               </Grid>
@@ -284,6 +267,16 @@ const UserProfileCard = () => {
                   onChange={(e) => handleChange("GENDER", e.target.value)}
                 />
               </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  label="Apodo (Nickname)"
+                  fullWidth
+                  value={profile.NICKNAME}
+                  onChange={(e) => handleChange("NICKNAME", e.target.value)}
+                />
+              </Grid>
+              
               {/* Mostrar el mensaje si los campos no están completos */}
               {isIncomplete && (
                 <Grid item xs={12}>
@@ -296,15 +289,6 @@ const UserProfileCard = () => {
                   </Typography>
                 </Grid>
               )}
-
-              <Grid item xs={12}>
-                <TextField
-                  label="Apodo (Nickname)"
-                  fullWidth
-                  value={profile.NICKNAME}
-                  onChange={(e) => handleChange("NICKNAME", e.target.value)}
-                />
-              </Grid>
               <Grid item xs={12}>
                 <TextField
                   label="Institución"

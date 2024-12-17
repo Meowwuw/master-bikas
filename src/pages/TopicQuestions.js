@@ -12,14 +12,18 @@ import {
   TableRow,
   Paper,
   CircularProgress,
+  TextField
 } from "@mui/material";
 import axios from "axios";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 const TopicQuestions = () => {
   const { courseId } = useParams(); 
   const [topics, setTopics] = useState([]);
-  const [loading, setLoading] = useState(true); 
+  const [filteredTopics, setFilteredTopics] = useState([]); // Temas filtrados
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(""); // Término de búsquedas
   const navigate = useNavigate(); 
 
   useEffect(() => {
@@ -30,6 +34,7 @@ const TopicQuestions = () => {
         );
 
         setTopics(response.data || []); 
+        setFilteredTopics(response.data || []);
       } catch (error) {
         console.error("Error al obtener los temas:", error);
       } finally {
@@ -39,6 +44,14 @@ const TopicQuestions = () => {
 
     fetchTopics();
   }, [courseId]);
+
+  // Filtra los temas en tiempo real
+  useEffect(() => {
+    const results = topics.filter((topic) =>
+      topic.TOPIC_NAME.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredTopics(results);
+  }, [searchTerm, topics]);
 
   const handleTopicClick = async (topicId) => {
     try {
@@ -61,24 +74,44 @@ const TopicQuestions = () => {
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Navbar />
       <Container sx={{ flexGrow: 1, mt: 4 }}>
-        <Typography
-          variant="h4"
-          sx={{ my: 4, textAlign: "center", color: "#0cc0df" }}
+        {/* Contenedor del título y buscador */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 4,
+          }}
         >
-          Temas del Curso
-        </Typography>
+          <Typography
+            variant="h4"
+            sx={{ color: "#0cc0df" }}
+          >
+            TEMAS DEL CURSO
+          </Typography>
+
+          {/* Buscador */}
+          <TextField
+            label="Buscar tema"
+            variant="outlined"
+            placeholder="Ejemplo: Álgebra"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ width: "30%" }}
+          />
+        </Box>
 
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
             <CircularProgress />
           </Box>
-        ) : topics.length === 0 ? (
+        ) : filteredTopics.length === 0 ? (
           <Typography
             variant="body1"
             color="textSecondary"
             sx={{ textAlign: "center", mt: 4 }}
           >
-            No hay temas disponibles para este curso.
+            No se encontraron temas relacionados.
           </Typography>
         ) : (
           <TableContainer component={Paper}>
@@ -94,12 +127,12 @@ const TopicQuestions = () => {
                       fontSize: "1.2rem",
                     }}
                   >
-                    Temas
+                    TEMAS
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {topics.map((topic) => (
+                {filteredTopics.map((topic) => (
                   <TableRow
                     key={topic.TOPIC_ID}
                     onClick={() => handleTopicClick(topic.TOPIC_ID)}
@@ -121,20 +154,7 @@ const TopicQuestions = () => {
           </TableContainer>
         )}
       </Container>
-
-      <Box
-        sx={{
-          bgcolor: "#0cc0df",
-          color: "#FEFEFE",
-          textAlign: "center",
-          p: 2,
-          mt: "auto",
-        }}
-      >
-        <Typography variant="body2">
-          © 2024 MasterBikas. Todos los derechos reservados.
-        </Typography>
-      </Box>
+        <Footer />
     </Box>
   );
 };

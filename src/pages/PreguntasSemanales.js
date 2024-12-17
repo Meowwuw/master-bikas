@@ -54,7 +54,9 @@ const PreguntasSemanales = () => {
       const file = fileInput.files[0];
 
       if (!file) {
-        setDialogMessage("Por favor, selecciona un archivo antes de subir tu respuesta.");
+        setDialogMessage(
+          "Por favor, selecciona un archivo antes de subir tu respuesta."
+        );
         setDialogType("error");
         setOpenDialog(true);
         return;
@@ -87,7 +89,9 @@ const PreguntasSemanales = () => {
       );
     } catch (error) {
       console.error("Error al enviar la respuesta:", error);
-      setDialogMessage("No se pudo enviar la respuesta. Puede que se haya alcanzado el límite.");
+      setDialogMessage(
+        "No se pudo enviar la respuesta. Puede que se haya alcanzado el límite."
+      );
       setDialogType("error");
       setOpenDialog(true);
     }
@@ -104,7 +108,7 @@ const PreguntasSemanales = () => {
       <Box sx={{ p: 5, mt: 2, mb: 5 }}>
         <Container maxWidth="md" sx={{ mt: 4 }}>
           <Typography variant="h4" gutterBottom align="center">
-            ¡Resuelve y Gana Puntos!
+            ¡RESUELVE Y GANA PUNTOS!
           </Typography>
           <Typography variant="body1" gutterBottom align="center">
             Cada pregunta tiene un valor específico en puntos, así que
@@ -144,7 +148,7 @@ const PreguntasSemanales = () => {
 
           <Divider sx={{ my: 4 }} />
 
-          {questions.map((question) => (
+          {questions.map((question, index) => (
             <Box
               key={question.QUESTION_W_ID}
               sx={{
@@ -152,18 +156,28 @@ const PreguntasSemanales = () => {
                 p: 2,
                 border: "1px solid #ddd",
                 borderRadius: "8px",
+                textTransform: "uppercase",
               }}
             >
-              <Typography variant="h6">
+              <Typography variant="h6" sx={{ color: "#0cc0df", mb: 1 }}>
+                {`Pregunta ${index + 1}`}
+              </Typography>
+
+              <Typography variant="h6" sx={{ mb: 1 }}>
                 {question.TOPIC_NAME} (Vale {question.POINTS} puntos)
               </Typography>
-              <Typography variant="body1" sx={{ mb: 2 }}>
+
+              <Typography variant="body1" sx={{ mb: 2, textAlign: "center" }}>
                 <img
                   src={question.QUESTION_IMAGE}
                   alt={question.TOPIC_NAME}
-                  style={{ maxWidth: "100%", borderRadius: "8px" }}
+                  style={{
+                    maxWidth: "100%",
+                    borderRadius: "8px",
+                  }}
                 />
               </Typography>
+
               <input
                 type="file"
                 id={`file-input-${question.QUESTION_W_ID}`}
@@ -195,25 +209,27 @@ const PreguntasSemanales = () => {
             </Box>
           ))}
 
-{error && (
-          <Alert severity="error" sx={{ mt: 4 }}>
-            {error}
-          </Alert>
-        )}
+          {error && (
+            <Alert severity="error" sx={{ mt: 4 }}>
+              {error}
+            </Alert>
+          )}
 
-        {/* Diálogo de éxito o error */}
-        <Dialog open={openDialog} onClose={handleCloseDialog}>
-          <DialogTitle>{dialogType === "error" ? "Error" : "Éxito"}</DialogTitle>
-          <DialogContent>
-            <DialogContentText>{dialogMessage}</DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog} color="primary">
-              Cerrar
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Container>
+          {/* Diálogo de éxito o error */}
+          <Dialog open={openDialog} onClose={handleCloseDialog}>
+            <DialogTitle>
+              {dialogType === "error" ? "Error" : "Éxito"}
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>{dialogMessage}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog} color="primary">
+                Cerrar
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Container>
       </Box>
       <Footer />
     </Box>

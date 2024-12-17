@@ -26,7 +26,7 @@ const Podium = () => {
 
   return (
     <div style={{ textAlign: 'center', marginTop: '20px', padding: '30px 0px' }}>
-      <h2 style={{ color: '#000' }}>Podio de Usuarios con más puntos</h2>
+      <h2 style={{ color: '#000' }}>PODIO DE USUARIOS CON MAS PUNTOS</h2>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }}>
         {/* Silver Trophy */}
         <div style={{ marginRight: '20px', textAlign: 'center' }}>

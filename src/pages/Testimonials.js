@@ -34,7 +34,7 @@ const Testimonials = () => {
           variant="h4"
           sx={{ mb: 4, textAlign: "center", color: "#0cc0df" }}
         >
-          Testimonios
+          TESTIMONIOS
         </Typography>
         <Grid container spacing={4}>
           {testimonials.map((testimonial) => (
