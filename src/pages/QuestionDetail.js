@@ -9,22 +9,24 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Modal
 } from "@mui/material";
+import ZoomableImageModal from "./ZoomableImageModal";
+
 import axios from "axios";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
 const QuestionDetail = () => {
   const { courseId, topicId, questionId } = useParams();
-  const [question, setQuestion] = useState({});
-  const [answer, setAnswer] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [position, setPosition] = useState({ x: "50%", y: "50%" });
+  const [currentImage, setCurrentImage] = useState(null);
+  const [question, setQuestion] = useState([]);
+  const [answer, setAnswer] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(true);
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [currentImage, setCurrentImage] = useState(null); // Guarda la imagen seleccionada
-  const [position, setPosition] = useState({ x: "50%", y: "50%" });
   const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
 
@@ -32,33 +34,50 @@ const QuestionDetail = () => {
     const fetchInitialData = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        navigate("/register");
+        navigate("/login");
         return;
       }
 
       try {
-        const questionsResponse = await axios.get(
-          `http://54.165.220.109:3000/api/topics/${topicId}/questions`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+        // Fetch question details
+        const questionResponse = await axios.get(
+          `https://api.master-bikas.com/api/topics/${topicId}/questions`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        setQuestion(questionsResponse.data);
+        setQuestion(questionResponse.data);
 
-        const paymentResponse = await axios.get(
-          `http://54.165.220.109:3000/api/check-payment-status/${questionId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+        const answersMap = {};
+
+        await Promise.all(
+          questionResponse.data.map(async (q) => {
+            try {
+              const paymentResponse = await axios.get(
+                `https://api.master-bikas.com/api/check-payment-status/${q.QUESTION_ID}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+
+              if (paymentResponse.data.status === "confirmado") {
+                const answerResponse = await axios.get(
+                  `https://api.master-bikas.com/api/answers/${q.QUESTION_ID}`
+                );
+                answersMap[q.QUESTION_ID] = {
+                  link: answerResponse.data.LINK,
+                  isLocked: false,
+                };
+              } else {
+                answersMap[q.QUESTION_ID] = { link: null, isLocked: true };
+              }
+            } catch (error) {
+              answersMap[q.QUESTION_ID] = { link: null, isLocked: true };
+            }
+          })
         );
 
-        if (paymentResponse.data.status === "confirmado") {
-          await fetchAnswer();
-          return;
-        }
+        setAnswer(answersMap);
 
+        // Check remaining attempts
         const attemptsResponse = await axios.get(
-          "http://54.165.220.109:3000/api/users/attempts",
+          "https://api.master-bikas.com/api/attempts",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -67,7 +86,7 @@ const QuestionDetail = () => {
       } catch (error) {
         if (error.response?.status === 401) {
           alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
-          navigate("/register");
+          navigate("/login");
         } else if (error.response?.status === 404) {
           console.error("La pregunta o el estado de pago no se encontró.");
         } else {
@@ -77,48 +96,45 @@ const QuestionDetail = () => {
     };
 
     fetchInitialData();
-  }, [questionId, navigate]);
+  }, [topicId, navigate]);
 
-  const fetchAnswer = async () => {
-    try {
-      const answerResponse = await axios.get(
-        `http://54.165.220.109:3000/api/answers/${questionId}`
-      );
-      setAnswer(answerResponse.data);
-      setIsLocked(false);
-    } catch (error) {
-      console.error("Error al obtener la respuesta:", error);
-    }
-  };
-
-  const handleUnlockContent = async () => {
+  const handleUnlockContent = async (questionId) => {
     if (isSubmitting) return;
-    setIsSubmitting(true);
 
     const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const response = await axios.post(
-          "http://54.165.220.109:3000/api/users/attempts/use",
-          {},
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        if (response.data.remaining_attempts >= 0) {
-          setAttempts(response.data.remaining_attempts);
-          await fetchAnswer();
-        } else {
-          setOpenDialog(true);
-        }
-      } catch (error) {
-        console.error("Error al usar los intentos:", error);
-        if (error.response?.status === 403) setOpenDialog(true);
-      } finally {
-        setIsSubmitting(false);
-      }
-    } else {
+    if (!token) {
       navigate("/register");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const response = await axios.post(
+        "https://api.master-bikas.com/api/attempts/use",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.remaining_attempts >= 0) {
+        // Intentos disponibles, desbloquear la respuesta
+        setAttempts(response.data.remaining_attempts);
+
+        const answerResponse = await axios.get(
+          `https://api.master-bikas.com/api/answers/${questionId}`
+        );
+
+        setAnswer((prev) => ({
+          ...prev,
+          [questionId]: { link: answerResponse.data.LINK, isLocked: false },
+        }));
+      } else {
+        // Sin intentos, mostrar el diálogo
+        setOpenDialog(true);
+      }
+    } catch (error) {
+      console.error("Error al desbloquear el contenido:", error);
+      setOpenDialog(true); // Mostrar el diálogo si hay un error
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -128,33 +144,14 @@ const QuestionDetail = () => {
     navigate("/pago", { state: { questionId } });
   };
 
-  // Manejar movimiento del mouse para zoom
-  const handleMouseMove = (e) => {
-    const { left, top, width, height } = e.target.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100; // Posición horizontal
-    const y = ((e.clientY - top) / height) * 100; // Posición vertical
-    setPosition({ x: `${x}%`, y: `${y}%` });
-  };
-
-  // Manejar apertura del modal
   const handleImageClick = (image) => {
     setCurrentImage(image);
-    setIsZoomed(true);
+    setIsModalOpen(true);
   };
 
-  // Cerrar el modal
-  const handleClose = () => {
-    setIsZoomed(false);
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
     setCurrentImage(null);
-  };
-
-  const handleMouseEnter = () => {
-    setIsZoomed(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsZoomed(false);
-    setPosition({ x: "50%", y: "50%" });
   };
 
   return (
@@ -169,138 +166,101 @@ const QuestionDetail = () => {
           alignItems: "center",
         }}
       >
-        {question.map((question, index) => (
-        <Box
-          key={index}
-          sx={{
-            mb: 4,
-            textAlign: "center",
-          }}
-        >
-          {/* Título de la pregunta */}
-          <Typography
-            variant="h4"
-            sx={{ my: 2, textAlign: "center", color: "#0cc0df" }}
-          >
-            {question.QUESTION_TEXT}
-          </Typography>
+        {Array.isArray(question) && question.length > 0 ? (
+          question.map((item, index) => (
+            <Box key={index} sx={{ mb: 4 }}>
+              {/* Título de la Pregunta */}
+              <Typography
+                variant="h4"
+                sx={{ my: 2, textAlign: "center", color: "#0cc0df" }}
+              >
+                {`Pregunta ${index + 1}: ${item.QUESTION_TEXT}`}
+              </Typography>
 
-          {/* Imagen con click para agrandar */}
-          <div
-            style={{
-              width: "50%",
-              margin: "0 auto",
-              cursor: "pointer",
-            }}
-          >
-            <img
-              src={question.QUESTION_IMAGE}
-              alt={`Pregunta ${index + 1}`}
-              style={{
-                width: "100%",
-                maxHeight: "400px",
-                transition: "transform 0.3s ease",
-              }}
-              onClick={() => handleImageClick(question.QUESTION_IMAGE)} // Click para abrir modal
-            />
-          </div>
-        </Box>
-      ))}
+              {/* Puntos y Monto */}
+              <Typography variant="body1" sx={{ textAlign: "center", mt: 2 }}>
+                <strong>Puntos requeridos:</strong> {item.POINTS || "N/A"}
+              </Typography>
+              <Typography variant="body1" sx={{ textAlign: "center", mt: 1 }}>
+                <strong>Monto:</strong> S/ {item.AMOUNT || "N/A"}
+              </Typography>
 
-      {/* Modal para mostrar imagen grande */}
-      <Modal
-        open={isZoomed}
-        onClose={handleClose}
-        aria-labelledby="zoomed-image-modal"
-        aria-describedby="image-zoom-description"
-      >
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
-          }}
-          onMouseMove={handleMouseMove}
-          onClick={handleClose} // Cerrar modal al hacer click afuera
-        >
-          <img
-            src={currentImage}
-            alt="Zoomed"
-            style={{
-              width: "auto",
-              height: "80%",
-              transformOrigin: `${position.x} ${position.y}`,
-              transform: "scale(2)", // Zoom
-              transition: "transform 0.2s ease",
-            }}
-          />
-        </Box>
-      </Modal>
-
-        {/* Mensaje o respuesta centrada */}
-        {isLocked ? (
-          <Typography variant="body1" sx={{ mt: 4, textAlign: "center" }}>
-            La respuesta está bloqueada. Usa un intento para desbloquearla.
-          </Typography>
-        ) : (
-          <div
-            style={{
-              width: "50%",
-              margin: "0 auto",
-              textAlign: "center",
-              overflow: "hidden",
-            }}
-          >
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Respuesta:
-            </Typography>
-
-            <div
-              style={{
-                overflow: "hidden",
-                position: "relative",
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                backgroundColor: "#f9f9f9",
-              }}
-            >
-              <img
-                src={answer?.LINK}
-                alt="Respuesta"
+              {/* Imagen de la Pregunta */}
+              <div
                 style={{
-                  width: "100%",
-                  height: "auto",
-                  transition: "transform 0.3s ease",
-                  transform: isZoomed ? "scale(1.5)" : "scale(1)",
-                  transformOrigin: `${position.x} ${position.y}`,
+                  width: "50%",
+                  textAlign: "center",
+                  marginBottom: "16px",
+                  maxHeight: "400px",
                 }}
-                onMouseEnter={handleMouseEnter}
-                onMouseMove={isZoomed ? handleMouseMove : null}
-                onMouseLeave={handleMouseLeave}
-              />
-            </div>
-          </div>
-        )}
+              >
+                <img
+                  src={item.QUESTION_IMAGE}
+                  alt={`Pregunta ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    maxHeight: "400px",
+                    objectFit: "contain",
+                    transition: "filter 0.5s ease",
+                  }}
+                />
+              </div>
 
-        {/* Botón centrado */}
-        {isLocked && (
-          <Button
-            onClick={handleUnlockContent}
-            disabled={isSubmitting}
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
+              {/* Mostrar Respuesta */}
+              {answer[item.QUESTION_ID]?.isLocked ? (
+                <>
+                  <Typography variant="body1" sx={{ textAlign: "center" }}>
+                    La respuesta está bloqueada. Usa un intento para
+                    desbloquearla.
+                  </Typography>
+                  <Button
+                    onClick={() => handleUnlockContent(item.QUESTION_ID)}
+                    disabled={isSubmitting}
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 2 }}
+                  >
+                    {isSubmitting ? "Procesando..." : "Desbloquear Contenido"}
+                  </Button>
+                </>
+              ) : answer[item.QUESTION_ID]?.link ? (
+                <div style={{ width: "50%", margin: "0 auto" }}>
+                  <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+                    Respuesta:
+                  </Typography>
+                  <img
+                    src={answer[item.QUESTION_ID].link}
+                    alt="Respuesta"
+                    style={{ width: "100%", height: "auto", cursor: "pointer" }}
+                    onClick={() =>
+                      handleImageClick(answer[item.QUESTION_ID].link)
+                    }
+                  />
+                </div>
+              ) : (
+                <Typography
+                  variant="body1"
+                  sx={{ textAlign: "center", color: "gray" }}
+                >
+                  La respuesta no está disponible.
+                </Typography>
+              )}
+            </Box>
+          ))
+        ) : (
+          <Typography
+            variant="body1"
+            sx={{ color: "red", textAlign: "center" }}
           >
-            {isSubmitting ? "Procesando..." : "Desbloquear Contenido"}
-          </Button>
+            No hay preguntas disponibles.
+          </Typography>
         )}
+        {/* Modal para Mostrar la Imagen */}
+        <ZoomableImageModal
+          isModalOpen={isModalOpen}
+          handleCloseModal={handleCloseModal}
+          currentImage={currentImage}
+        />
       </Container>
 
       <Dialog open={openDialog} onClose={handleDialogClose}>

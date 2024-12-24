@@ -38,7 +38,7 @@ const Navbar = () => {
     const fetchPoints = async () => {
       try {
         const response = await axios.get(
-          "http://54.165.220.109:3000/api/users/points",
+          "https://api.master-bikas.com/api/points",
           {
             headers: {
               Authorization: `Bearer ${storedToken}`,
@@ -60,7 +60,7 @@ const Navbar = () => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.post(
-        "http://54.165.220.109:3000/api/auth/logout",
+        "https://api.master-bikas.com/api/auth/logout",
         {},
         {
           headers: {
@@ -238,8 +238,8 @@ const Navbar = () => {
               <MenuItem onClick={() => navigate("/user-profile")}>
                 Mi Perfil
               </MenuItem>
-              <MenuItem onClick={() => navigate("/puntos")}>
-                Mis Puntos
+              <MenuItem onClick={() => navigate("/awards")}>
+                Premios
               </MenuItem>
               <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
             </Menu>

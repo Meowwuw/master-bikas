@@ -14,7 +14,7 @@ const Podium = () => {
   useEffect(() => {
     const fetchTopUsers = async () => {
       try {
-        const response = await axios.get('http://54.165.220.109:3000/api/users/top-points');
+        const response = await axios.get('https://api.master-bikas.com/api/top-points');
         setTopUsers(response.data); 
       } catch (error) {
         console.error('Error al obtener los usuarios con más puntos:', error);

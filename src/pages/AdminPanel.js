@@ -44,7 +44,7 @@ const AdminPanel = () => {
 
   const fetchPayments = async () => {
     try {
-      const response = await axios.get("http://54.165.220.109:3000/api/payments");
+      const response = await axios.get("https://api.master-bikas.com/api/payments");
       setPayments(response.data);
     } catch (error) {
       console.error("Error al obtener los pagos:", error);
@@ -60,7 +60,7 @@ const AdminPanel = () => {
   const handleDeleteClick = async (id) => {
     if (window.confirm("¿Estás seguro de eliminar este pago?")) {
       try {
-        await axios.delete(`http://54.165.220.109:3000/api/payments/${id}`);
+        await axios.delete(`https://api.master-bikas.com/api/payments/${id}`);
         fetchPayments(); // Refrescar los datos
       } catch (error) {
         console.error("Error al eliminar el pago:", error);
@@ -83,7 +83,7 @@ const AdminPanel = () => {
     }
   
     try {
-      await axios.put(`http://54.165.220.109:3000/api/payments/${id}`, {
+      await axios.put(`https://api.master-bikas.com/api/payments/${id}`, {
         status: editStatus,
         amount: parseFloat(editAmount).toFixed(3),
       });

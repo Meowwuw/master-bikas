@@ -13,6 +13,8 @@ const PagoYape = () => {
   const navigate = useNavigate();
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
   const [timer, setTimer] = useState(300);
+  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [showWhatsAppButton, setShowWhatsAppButton] = useState(false);
   const [questionId, setQuestionId] = useState(
     location.state?.questionId || null
   );
@@ -21,7 +23,7 @@ const PagoYape = () => {
   useEffect(() => {
     if (!questionId) {
       alert("No se seleccionó ninguna pregunta.");
-      navigate("/"); // Redirige si no hay una pregunta seleccionada
+      navigate("/");
     }
   }, [questionId, navigate]);
 
@@ -31,7 +33,7 @@ const PagoYape = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          `http://54.165.220.109:3000/api/questions/${questionId}`,
+          `https://api.master-bikas.com/api/questions/${questionId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -39,7 +41,7 @@ const PagoYape = () => {
           }
         );
         if (response.status === 200) {
-          setAmount(response.data.AMOUNT); 
+          setAmount(response.data.AMOUNT);
         }
       } catch (error) {
         console.error("Error al obtener el monto de la pregunta", error);
@@ -58,13 +60,8 @@ const PagoYape = () => {
             return prev - 1;
           } else {
             clearInterval(countdown);
-            // Check payment status
+            setShowWhatsAppButton(true);
             checkPaymentStatus();
-            
-            // If payment is not confirmed, redirect to WhatsApp
-            if (!checkIfPaymentConfirmed()) {
-              redirectToWhatsApp();
-            }
             return 0;
           }
         });
@@ -72,7 +69,7 @@ const PagoYape = () => {
 
       const statusCheckInterval = setInterval(() => {
         checkPaymentStatus();
-      }, 10000); // Verificación cada 10 segundos
+      }, 10000);
 
       return () => {
         clearInterval(countdown);
@@ -81,12 +78,19 @@ const PagoYape = () => {
     }
   }, [paymentConfirmed]);
 
+  const redirectToWhatsApp = () => {
+    const phoneNumber = "+51921346549";
+    const message = encodeURIComponent(
+      "Hola, necesito ayuda para confirmar mi pago realizado por Yape. ¿Podrían ayudarme?"
+    );
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
+  };
 
   const checkIfPaymentConfirmed = async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://54.165.220.109:3000/api/check-payment-status",
+        "https://api.master-bikas.com/api/check-payment-status",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -100,29 +104,27 @@ const PagoYape = () => {
       return false;
     }
   };
-  
-  const redirectToWhatsApp = () => {
-    const phoneNumber = "+51921346549";
-    const message = encodeURIComponent(
-      "Hola, necesito ayuda para confirmar mi pago realizado por Yape. ¿Podrían ayudarme?"
-    );
-    window.location.href = `https://wa.me/${phoneNumber}?text=${message}`;
-  };
 
   const handlePayment = async () => {
+    if (!selectedMethod) {
+      alert("Por favor, selecciona un método de pago.");
+      return;
+    }
+
     if (!questionId) {
       alert("Por favor, selecciona una pregunta.");
       return;
     }
+
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://54.165.220.109:3000/api/payments-confirm",
+        "https://api.master-bikas.com/api/payments-confirm",
         {
           amount,
-          payment_method: "YAPE",
+          payment_method: selectedMethod,
           currency: "PEN",
-          description: "Pago por acceso a contenido",
+          description: `Pago por acceso a contenido con ${selectedMethod}`,
           question_id: questionId,
         },
         {
@@ -142,11 +144,15 @@ const PagoYape = () => {
     }
   };
 
+  const handleMethodSelect = (method) => {
+    setSelectedMethod(method);
+  };
+
   const checkPaymentStatus = async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://54.165.220.109:3000/api/check-payment-status",
+        "https://api.master-bikas.com/api/check-payment-status",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -182,33 +188,51 @@ const PagoYape = () => {
           }}
         >
           <Typography variant="h4" sx={{ mb: 4, textAlign: "center" }}>
-            PAGA CON YAPE O PLIN 
+            PAGA CON YAPE O PLIN
           </Typography>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "16px", 
-            }}
+          <Box
+            sx={{ display: "flex", gap: 2, justifyContent: "center", mb: 4 }}
           >
-            <img
-              src={QRCode}
-              alt="Código QR Yape 1"
-              style={{ width: 256, height: 256 }}
-            />
-            <img
-              src={QRCode2}
-              alt="Código QR Yape 2"
-              style={{ width: 256, height: 256 }}
-            />
-          </div>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleMethodSelect("YAPE")}
+              sx={{
+                bgcolor: selectedMethod === "YAPE" ? "#0cc0df" : "inherit",
+              }}
+            >
+              Pagar con YAPE
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleMethodSelect("PLIN")}
+              sx={{
+                bgcolor: selectedMethod === "PLIN" ? "#0cc0df" : "inherit",
+              }}
+            >
+              Pagar con PLIN
+            </Button>
+          </Box>
+
+          {selectedMethod && (
+            <Box sx={{ textAlign: "center", mt: 4 }}>
+              <img
+                src={selectedMethod === "YAPE" ? QRCode : QRCode2}
+                alt={`Código QR ${selectedMethod}`}
+                style={{ width: 256, height: 256 }}
+              />
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                Escanea el código para pagar con {selectedMethod}
+              </Typography>
+            </Box>
+          )}
+
           {amount && (
             <Typography variant="h6" sx={{ mt: 2, textAlign: "center" }}>
               Monto a pagar: S/ {amount}
             </Typography>
           )}
-
           <Button
             variant="contained"
             color="primary"
@@ -223,6 +247,24 @@ const PagoYape = () => {
               Espera {Math.floor(timer / 60)}:{("0" + (timer % 60)).slice(-2)}{" "}
               minutos para la confirmación.
             </Typography>
+          )}
+
+          {showWhatsAppButton && (
+            <button
+              onClick={redirectToWhatsApp}
+              style={{
+                backgroundColor: "#25D366",
+                color: "white",
+                padding: "10px 20px",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+                fontSize: "16px",
+                marginTop: "1rem",
+              }}
+            >
+              Contactar por WhatsApp
+            </button>
           )}
         </Box>
       </Container>

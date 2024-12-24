@@ -15,7 +15,7 @@ const Publicidad = () => {
   useEffect(() => {
     const fetchAds = async () => {
       try {
-        const response = await axios.get("http://54.165.220.109:3000/api/videos");
+        const response = await axios.get("https://api.master-bikas.com/api/videos");
         setAds(response.data);
       } catch (error) {
         console.error("Error al obtener los videos:", error);
@@ -161,6 +161,7 @@ const Publicidad = () => {
                 <video
                   key={currentAdIndex}
                   ref={videoRef}
+                  controls={true} 
                   src={ads[currentAdIndex].LINK}
                   style={{
                     width: "100%",
@@ -169,7 +170,6 @@ const Publicidad = () => {
                   }}
                   onPause={handlePause}
                   onEnded={handleVideoEnd}
-                  controls={false}
                 />
                 {/* Botón de play */}
                 {!isPlaying && (

@@ -9,7 +9,7 @@ const ForgotPassword = () => {
 
   const handleForgotPassword = async () => {
     try {
-      const response = await axios.post('http://54.165.220.109:3000/api/users/forgot-password', { email });
+      const response = await axios.post('https://api.master-bikas.com/api/forgot-password', { email });
       setMessage(response.data.message);
     } catch (error) {
       setError(error.response?.data?.error || 'Error al solicitar restablecimiento de contraseña');

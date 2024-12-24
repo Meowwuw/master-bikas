@@ -19,7 +19,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await axios.post('http://54.165.220.109:3000/api/users/reset-password', { password, token });
+      const response = await axios.post('https://api.master-bikas.com/api/reset-password', { password, token });
       setMessage(response.data.message);
     } catch (error) {
       setError(error.response?.data?.error || 'Error al restablecer la contraseña');

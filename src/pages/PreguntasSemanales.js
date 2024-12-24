@@ -29,7 +29,7 @@ const PreguntasSemanales = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://54.165.220.109:3000/api/weekly-questions",
+          "https://api.master-bikas.com/api/weekly-questions",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -66,7 +66,7 @@ const PreguntasSemanales = () => {
       formData.append("QUESTION_W_ID", questionId);
 
       await axios.post(
-        "http://54.165.220.109:3000/api/upload-weekly-answer",
+        "https://api.master-bikas.com/api/upload-weekly-answer",
         formData,
         {
           headers: {
@@ -156,14 +156,13 @@ const PreguntasSemanales = () => {
                 p: 2,
                 border: "1px solid #ddd",
                 borderRadius: "8px",
-                textTransform: "uppercase",
               }}
             >
               <Typography variant="h6" sx={{ color: "#0cc0df", mb: 1 }}>
                 {`Pregunta ${index + 1}`}
               </Typography>
 
-              <Typography variant="h6" sx={{ mb: 1 }}>
+              <Typography variant="h6" sx={{ mb: 1, textTransform: "uppercase" }}>
                 {question.TOPIC_NAME} (Vale {question.POINTS} puntos)
               </Typography>
 

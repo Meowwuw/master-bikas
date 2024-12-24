@@ -12,36 +12,51 @@ import {
   TableRow,
   Paper,
   CircularProgress,
-  TextField
+  TextField,
 } from "@mui/material";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
 const TopicQuestions = () => {
-  const { courseId } = useParams(); 
+  const { courseId } = useParams();
   const [topics, setTopics] = useState([]);
-  const [filteredTopics, setFilteredTopics] = useState([]); // Temas filtrados
+  const [filteredTopics, setFilteredTopics] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(""); // Término de búsquedas
-  const navigate = useNavigate(); 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [courseName, setCourseName] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchCourseDetails = async () => {
+      try {
+        const response = await axios.get(
+          `https://api.master-bikas.com/api/courses/${courseId}`
+        );
+        setCourseName(response.data.COURSE_NAME || "Nombre no disponible");
+      } catch (error) {
+        console.error("Error al obtener el nombre del curso:", error);
+        setCourseName("Nombre no disponible");
+      }
+    };
+
     const fetchTopics = async () => {
       try {
         const response = await axios.get(
-          `http://54.165.220.109:3000/api/courses/${courseId}/topics`
+          `https://api.master-bikas.com/api/courses/${courseId}/topics`
         );
 
-        setTopics(response.data || []); 
+        setTopics(response.data || []);
         setFilteredTopics(response.data || []);
       } catch (error) {
         console.error("Error al obtener los temas:", error);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
+    fetchCourseDetails();
     fetchTopics();
   }, [courseId]);
 
@@ -55,12 +70,16 @@ const TopicQuestions = () => {
 
   const handleTopicClick = async (topicId) => {
     try {
-      const response = await axios.get(`http://54.165.220.109:3000/api/topics/${topicId}/questions`);
+      const response = await axios.get(
+        `https://api.master-bikas.com/api/topics/${topicId}/questions`
+      );
       const questions = response.data;
-  
+
       if (questions.length > 0) {
         const firstQuestionId = questions[0].QUESTION_ID;
-        navigate(`/course/${courseId}/topic/${topicId}/questions/${firstQuestionId}`);
+        navigate(
+          `/course/${courseId}/topic/${topicId}/questions/${firstQuestionId}`
+        );
       } else {
         alert("No hay preguntas disponibles para este tema.");
       }
@@ -68,7 +87,6 @@ const TopicQuestions = () => {
       console.error("Error al obtener las preguntas:", error);
     }
   };
-  
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -78,27 +96,37 @@ const TopicQuestions = () => {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "space-between",
+            flexDirection: "column",
             alignItems: "center",
-            mb: 4,
+            mb: 5,
+            mt: 5,
           }}
         >
+          {/* Título centrado */}
           <Typography
             variant="h4"
-            sx={{ color: "#0cc0df" }}
+            sx={{
+              color: "#0cc0df",
+              textAlign: "center",
+              mb: 2,
+            }}
           >
-            TEMAS DEL CURSO
+            {courseName}
           </Typography>
 
-          {/* Buscador */}
-          <TextField
-            label="Buscar tema"
-            variant="outlined"
-            placeholder="Ejemplo: Álgebra"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ width: "30%" }}
-          />
+          {/* Buscador alineado a la derecha */}
+          <Box
+            sx={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
+          >
+            <TextField
+              label="Buscar curso"
+              variant="outlined"
+              placeholder="Ejemplo: Calculo"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{ width: "30%" }}
+            />
+          </Box>
         </Box>
 
         {loading ? (
@@ -154,7 +182,7 @@ const TopicQuestions = () => {
           </TableContainer>
         )}
       </Container>
-        <Footer />
+      <Footer />
     </Box>
   );
 };

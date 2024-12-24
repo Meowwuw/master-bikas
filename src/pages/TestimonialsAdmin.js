@@ -41,7 +41,7 @@ const TestimonialsAdmin = () => {
   const fetchTestimonials = async () => {
     try {
       const response = await axios.get(
-        "http://54.165.220.109:3000/api/testimonials"
+        "https://api.master-bikas.com/api/testimonials"
       );
       setTestimonials(response.data);
     } catch (error) {
@@ -70,7 +70,7 @@ const handleSubmit = async (e) => {
     try {
       if (editing) {
         await axios.put(
-          `http://54.165.220.109:3000/api/testimonials/${editingId}`,
+          `https://api.master-bikas.com/api/testimonials/${editingId}`,
           formData,
           {
             headers: {
@@ -80,7 +80,7 @@ const handleSubmit = async (e) => {
         );
         setSuccessMessage("Testimonio actualizado exitosamente");
       } else {
-        await axios.post("http://54.165.220.109:3000/api/testimonials", formData, {
+        await axios.post("https://api.master-bikas.com/api/testimonials", formData, {
           headers: {
             'Content-Type': 'multipart/form-data' // Asegura que se envía como form-data
           }
@@ -100,7 +100,7 @@ const handleSubmit = async (e) => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://54.165.220.109:3000/api/testimonials/${id}`);
+      await axios.delete(`https://api.master-bikas.com/api/testimonials/${id}`);
       setSuccessMessage("Testimonio eliminado exitosamente");
       fetchTestimonials();
     } catch (error) {

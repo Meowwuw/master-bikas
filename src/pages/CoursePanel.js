@@ -36,7 +36,7 @@ const CoursePanel = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await axios.get("http://54.165.220.109:3000/api/courses");
+      const response = await axios.get("https://api.master-bikas.com/api/courses");
       setCourses(response.data || []);
     } catch (error) {
       console.error("Error al obtener los cursos:", error);
@@ -54,7 +54,7 @@ const CoursePanel = () => {
   const handleAddCourse = async () => {
     if (courseName) {
       try {
-        const response = await axios.post("http://54.165.220.109:3000/api/courses", {
+        const response = await axios.post("https://api.master-bikas.com/api/courses", {
           name: courseName,
           description,
         });
@@ -87,7 +87,7 @@ const CoursePanel = () => {
   
     try {
       const response = await axios.post(
-        "http://54.165.220.109:3000/api/courses/create-with-image",
+        "https://api.master-bikas.com/api/courses/create-with-image",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -116,7 +116,7 @@ const CoursePanel = () => {
 
     try {
       const response = await axios.post(
-        "http://54.165.220.109:3000/api/courses/upload-image",
+        "https://api.master-bikas.com/api/courses/upload-image",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -133,7 +133,7 @@ const CoursePanel = () => {
     if (selectedCourse && topicName) {
       try {
         const response = await axios.post(
-          `http://54.165.220.109:3000/api/courses/${selectedCourse.id}/topics`,
+          `https://api.master-bikas.com/api/courses/${selectedCourse.id}/topics`,
           {
             name: topicName,
           }
@@ -154,7 +154,7 @@ const CoursePanel = () => {
     if (selectedTopic && questionText && questionPrice) {
       try {
         await axios.post(
-          `http://54.165.220.109:3000/api/topics/${selectedTopic.id}/questions`,
+          `https://api.master-bikas.com/api/topics/${selectedTopic.id}/questions`,
           {
             text: questionText,
             price: questionPrice,
@@ -175,7 +175,7 @@ const CoursePanel = () => {
   const handleDeleteCourse = async (courseToDelete) => {
     try {
       await axios.delete(
-        `http://54.165.220.109:3000/api/courses/${courseToDelete.id}`
+        `https://api.master-bikas.com/api/courses/${courseToDelete.id}`
       );
       setCourses(courses.filter((course) => course.id !== courseToDelete.id));
     } catch (error) {
@@ -186,7 +186,7 @@ const CoursePanel = () => {
   const handleDeleteTopic = async (topicToDelete) => {
     try {
       await axios.delete(
-        `http://54.165.220.109:3000/api/topics/${topicToDelete.id}`
+        `https://api.master-bikas.com/api/topics/${topicToDelete.id}`
       );
       setCourses((prevCourses) =>
         prevCourses.map((course) =>
@@ -208,7 +208,7 @@ const CoursePanel = () => {
   const handleDeleteQuestion = async (questionToDelete) => {
     try {
       await axios.delete(
-        `http://54.165.220.109:3000/api/questions/${questionToDelete.id}`
+        `https://api.master-bikas.com/api/questions/${questionToDelete.id}`
       );
       setCourses((prevCourses) =>
         prevCourses.map((course) =>

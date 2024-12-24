@@ -24,6 +24,7 @@ import CoursePanel from "./pages/CoursePanel";
 import PreguntasSemanales from "./pages/PreguntasSemanales";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Awards from "./pages/Awards";
 
 const App = () => {
   return (
@@ -59,6 +60,7 @@ const App = () => {
         <Route path="/user-profile" element={<UserProfile />} />
         <Route path="/podium" element={<Podium />} />
         <Route path="/admin/coursePanel" element={<CoursePanel />} />
+        <Route path="/awards" element={<Awards/>}/>
       </Routes>
     </Router>
   );

@@ -10,6 +10,7 @@ import {
   Button,
   Box,
   TextField,
+  Pagination
 } from "@mui/material";
 import Navbar from "./Navbar";
 import axios from "axios";
@@ -21,12 +22,22 @@ const Services = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCourses, setFilteredCourses] = useState([]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 9;
+
+  const indexOfLastCourse = currentPage * coursesPerPage;
+  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
+  const currentCourses = filteredCourses.slice(
+    indexOfFirstCourse,
+    indexOfLastCourse
+  );
+
   // Llamada a la API para obtener cursos
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const response = await axios.get(
-          "http://54.165.220.109:3000/api/courses"
+          "https://api.master-bikas.com/api/courses"
         );
         setCourses(response.data || []);
         setFilteredCourses(response.data || []);
@@ -49,38 +60,54 @@ const Services = () => {
     navigate(`/course/${course.COURSE_ID}/topics`);
   };
 
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+  
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Navbar />
 
-      <Container sx={{ flexGrow: 1}}>
+      <Container sx={{ flexGrow: 1 }}>
         <Box
           sx={{
             display: "flex",
-            justifyContent: "space-between",
+            flexDirection: "column",
             alignItems: "center",
             mb: 5,
-            mt:5
+            mt: 5,
           }}
         >
-          {/* Título */}
-          <Typography variant="h4" sx={{ color: "#0cc0df", flexGrow: 1 }}>
+          {/* Título centrado */}
+          <Typography
+            variant="h4"
+            sx={{
+              color: "#0cc0df",
+              textAlign: "center",
+              mb: 2,
+            }}
+          >
             NUESTROS CURSOS
           </Typography>
 
-          {/* Buscador */}
-          <TextField
-            label="Buscar curso"
-            variant="outlined"
-            placeholder="Ejemplo: Calculo"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ width: "30%", marginLeft: "16px" }}
-          />
+          {/* Buscador alineado a la derecha */}
+          <Box
+            sx={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
+          >
+            <TextField
+              label="Buscar curso"
+              variant="outlined"
+              placeholder="Ejemplo: Calculo"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              sx={{ width: "30%" }}
+            />
+          </Box>
         </Box>
 
+        {/* Cursos paginados */}
         <Grid container spacing={4}>
-          {filteredCourses.map((course, index) => (
+          {currentCourses.map((course, index) => (
             <Grid item xs={12} md={4} key={index}>
               <Card
                 sx={{
@@ -138,11 +165,22 @@ const Services = () => {
           ))}
         </Grid>
 
+        {/* Mensaje si no hay cursos */}
         {filteredCourses.length === 0 && (
           <Typography variant="h6" sx={{ textAlign: "center", mt: 4 }}>
             No se encontraron cursos relacionados con "{searchTerm}".
           </Typography>
         )}
+
+        {/* Paginador */}
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Pagination
+            count={Math.ceil(filteredCourses.length / coursesPerPage)}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </Box>
       </Container>
 
       <Box sx={{ mt: 10 }}>

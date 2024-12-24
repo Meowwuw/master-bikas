@@ -17,7 +17,7 @@ const Testimonials = () => {
     const fetchTestimonials = async () => {
       try {
         const response = await axios.get(
-          "http://54.165.220.109:3000/api/testimonials"
+          "https://api.master-bikas.com/api/testimonials"
         );
         setTestimonials(response.data);
       } catch (error) {

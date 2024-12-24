@@ -103,7 +103,7 @@ const PublicidadConfig = () => {
                                         variant="contained"
                                         color="primary"
                                         onClick={() => handleSave(index)}
-                                        sx={{ ml: 2 }}  // Margen izquierdo de 2 unidades
+                                        sx={{ ml: 2 }}  
                                     >
                                         Guardar Cambios
                                     </Button>

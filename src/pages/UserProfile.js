@@ -46,7 +46,7 @@ const UserProfileCard = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://54.165.220.109:3000/api/perfil",
+          "https://api.master-bikas.com/api/perfil",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -54,7 +54,7 @@ const UserProfileCard = () => {
 
         const userProfile = {
           ...response.data,
-          BIRTHDATE: response.data.BIRTHDATE || "", 
+          BIRTHDATE: response.data.BIRTHDATE || "",
           NICKNAME: response.data.NICKNAME || "",
           SCHOOL_NAME: response.data.SCHOOL_NAME || "",
           DEPARTMENT: response.data.DEPARTMENT || "",
@@ -67,7 +67,7 @@ const UserProfileCard = () => {
         // Si hay un DEPARTMENT, carga las provincias
         if (response.data.DEPARTMENT) {
           const provincesResponse = await axios.get(
-            `http://54.165.220.109:3000/api/provinces/${response.data.DEPARTMENT}`
+            `https://api.master-bikas.com/api/provinces/${response.data.DEPARTMENT}`
           );
           setProvinces(provincesResponse.data);
         }
@@ -75,7 +75,7 @@ const UserProfileCard = () => {
         // Si hay una PROVINCE, carga los distritos
         if (response.data.PROVINCE) {
           const districtsResponse = await axios.get(
-            `http://54.165.220.109:3000/api/districts/${response.data.PROVINCE}`
+            `https://api.master-bikas.com/api/districts/${response.data.PROVINCE}`
           );
           setDistricts(districtsResponse.data);
         }
@@ -92,7 +92,7 @@ const UserProfileCard = () => {
     const fetchDepartments = async () => {
       try {
         const response = await axios.get(
-          "http://54.165.220.109:3000/api/departments"
+          "https://api.master-bikas.com/api/departments"
         );
         setDepartments(response.data);
       } catch (error) {
@@ -105,10 +105,15 @@ const UserProfileCard = () => {
 
   const handleDepartmentChange = async (value) => {
     handleChange("DEPARTMENT", value);
-    setProfile((prev) => ({ ...prev, DEPARTMENT: value, PROVINCE: "", DISTRICT: "" }));
+    setProfile((prev) => ({
+      ...prev,
+      DEPARTMENT: value,
+      PROVINCE: "",
+      DISTRICT: "",
+    }));
     try {
       const response = await axios.get(
-        `http://54.165.220.109:3000/api/provinces/${value}`
+        `https://api.master-bikas.com/api/provinces/${value}`
       );
       setProvinces(response.data);
       setDistricts([]);
@@ -122,7 +127,7 @@ const UserProfileCard = () => {
     handleChange("PROVINCE", value);
     try {
       const response = await axios.get(
-        `http://54.165.220.109:3000/api/districts/${value}`
+        `https://api.master-bikas.com/api/districts/${value}`
       );
       setDistricts(response.data);
     } catch (error) {
@@ -135,7 +140,7 @@ const UserProfileCard = () => {
     handleChange("DISTRICT", value);
     try {
       const response = await axios.get(
-        "http://54.165.220.109:3000/api/address-id",
+        "https://api.master-bikas.com/api/address-id",
         {
           params: {
             department: profile.DEPARTMENT,
@@ -176,16 +181,16 @@ const UserProfileCard = () => {
       setError("Por favor selecciona un Departamento, Provincia y Distrito.");
       return;
     }
-  
+
     try {
       const token = localStorage.getItem("token");
       // Actualizar el perfil
       await axios.put(
-        "http://54.165.220.109:3000/api/perfil",
+        "https://api.master-bikas.com/api/perfil",
         { ...profile },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-  
+
       setSuccess("Perfil actualizado correctamente.");
       setError("");
       setIsEditing(false);
@@ -194,7 +199,7 @@ const UserProfileCard = () => {
       setError("No se pudo actualizar el perfil.");
     }
   };
-  
+
   return (
     <Box
       sx={{
@@ -219,7 +224,7 @@ const UserProfileCard = () => {
                 <TextField
                   label="Nombres"
                   fullWidth
-                  value={profile.NAMES || ""} 
+                  value={profile.NAMES || ""}
                   onChange={(e) => handleChange("NAMES", e.target.value)}
                 />
               </Grid>
@@ -276,7 +281,7 @@ const UserProfileCard = () => {
                   onChange={(e) => handleChange("NICKNAME", e.target.value)}
                 />
               </Grid>
-              
+
               {/* Mostrar el mensaje si los campos no están completos */}
               {isIncomplete && (
                 <Grid item xs={12}>
@@ -298,11 +303,14 @@ const UserProfileCard = () => {
                 />
               </Grid>
               <Grid item xs={12}>
+                <InputLabel style={{ borderBottom: "none" }}>
+                  Departamento
+                </InputLabel>
                 <FormControl fullWidth>
-                  <InputLabel>Departamento</InputLabel>
                   <Select
                     value={profile.DEPARTMENT || ""}
                     onChange={(e) => handleDepartmentChange(e.target.value)}
+                    style={{ borderBottom: "none" }}
                   >
                     {departments.map((dept) => (
                       <MenuItem key={dept.DEPARTMENT} value={dept.DEPARTMENT}>
@@ -313,12 +321,15 @@ const UserProfileCard = () => {
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
+                <InputLabel style={{ borderBottom: "none" }}>
+                  Provincia
+                </InputLabel>
                 <FormControl fullWidth>
-                  <InputLabel>Provincia</InputLabel>
                   <Select
                     value={profile.PROVINCE || ""}
                     onChange={(e) => handleProvinceChange(e.target.value)}
                     disabled={!profile.DEPARTMENT}
+                    style={{ borderBottom: "none" }}
                   >
                     {provinces.map((prov) => (
                       <MenuItem key={prov.PROVINCE} value={prov.PROVINCE}>
@@ -329,12 +340,15 @@ const UserProfileCard = () => {
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
+                <InputLabel style={{ borderBottom: "none" }}>
+                  Distrito
+                </InputLabel>
                 <FormControl fullWidth>
-                  <InputLabel>Distrito</InputLabel>
                   <Select
                     value={profile.DISTRICT || ""}
                     onChange={(e) => handleDistrictChange(e.target.value)}
                     disabled={!profile.PROVINCE}
+                    style={{ borderBottom: "none" }}
                   >
                     {districts.map((dist) => (
                       <MenuItem key={dist.DISTRICT} value={dist.DISTRICT}>

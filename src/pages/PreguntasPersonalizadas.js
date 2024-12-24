@@ -46,9 +46,12 @@ const PreguntasPersonalizadas = () => {
 
       const fetchUserData = async () => {
         try {
-          const response = await axios.get("http://54.165.220.109:3000/api/perfil", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const response = await axios.get(
+            "https://api.master-bikas.com/api/perfil",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
           setUserPhone(response.data.TELEPHONE || "");
           setUserEmail(response.data.EMAIL || "");
         } catch (error) {
@@ -61,7 +64,9 @@ const PreguntasPersonalizadas = () => {
 
     const fetchCourses = async () => {
       try {
-        const response = await axios.get("http://54.165.220.109:3000/api/courses");
+        const response = await axios.get(
+          "https://api.master-bikas.com/api/courses"
+        );
         setCourses(response.data);
       } catch (error) {
         console.error("Error al obtener los cursos:", error);
@@ -100,38 +105,44 @@ const PreguntasPersonalizadas = () => {
     setPaymentUploaded(false);
 
     // Validaciones específicas antes de enviar
-  if (!questionImage) {
-    console.error("Error: Falta adjuntar la imagen de la pregunta.");
-    setError("Por favor, adjunta la imagen de la pregunta antes de continuar.");
-    return;
-  }
+    if (!questionImage) {
+      console.error("Error: Falta adjuntar la imagen de la pregunta.");
+      setError(
+        "Por favor, adjunta la imagen de la pregunta antes de continuar."
+      );
+      return;
+    }
 
-  if (!selectedCourse) {
-    console.error("Error: No se seleccionó un curso.");
-    setError("Por favor, selecciona un curso antes de enviar la consulta.");
-    return;
-  }
+    if (!selectedCourse) {
+      console.error("Error: No se seleccionó un curso.");
+      setError("Por favor, selecciona un curso antes de enviar la consulta.");
+      return;
+    }
 
-  if (!selectedLevel || !schoolName) {
-    console.error("Error: Datos incompletos (nivel escolar o nombre de la escuela).");
-    setError("Por favor, completa el nivel escolar y el nombre de la escuela.");
-    return;
-  }
-  
+    if (!selectedLevel || !schoolName) {
+      console.error(
+        "Error: Datos incompletos (nivel escolar o nombre de la escuela)."
+      );
+      setError(
+        "Por favor, completa el nivel escolar y el nombre de la escuela."
+      );
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       console.log("Token obtenido:", token);
-  
+
       let questionImageUrl = null;
-  
+
       // Subir la imagen de la pregunta si existe
       if (questionImage) {
         console.log("Subiendo imagen de la pregunta...");
         const questionFormData = new FormData();
         questionFormData.append("file", questionImage);
-  
+
         const questionUploadResponse = await axios.post(
-          "http://54.165.220.109:3000/api/upload-question",
+          "https://api.master-bikas.com/api/upload-question",
           questionFormData,
           {
             headers: {
@@ -140,20 +151,20 @@ const PreguntasPersonalizadas = () => {
             },
           }
         );
-  
+
         console.log(
           "Respuesta del backend (upload-question):",
           questionUploadResponse.data
         );
         questionImageUrl = questionUploadResponse.data.url;
       }
-  
+
       console.log("URL de la imagen de la pregunta:", questionImageUrl);
-  
+
       // Manejo de COURSE_ID y USER_COURSE
       let courseId = null;
       let userCourse = null;
-  
+
       if (typeof selectedCourse === "string") {
         // Curso personalizado
         userCourse = selectedCourse;
@@ -161,7 +172,7 @@ const PreguntasPersonalizadas = () => {
         // Curso existente
         courseId = selectedCourse.COURSE_ID;
       }
-  
+
       // Crear el payload con la URL de la imagen
       const payload = {
         COURSE_ID: courseId,
@@ -172,11 +183,11 @@ const PreguntasPersonalizadas = () => {
         CUSTOM_PAYMENT_URL: null,
         WHATSAPP_OPTION: true,
       };
-  
+
       console.log("Datos enviados al backend (WhatsApp):", payload);
-  
+
       const response = await axios.post(
-        "http://54.165.220.109:3000/api/pregunta",
+        "https://api.master-bikas.com/api/pregunta",
         payload,
         {
           headers: {
@@ -185,19 +196,19 @@ const PreguntasPersonalizadas = () => {
           },
         }
       );
-  
+
       console.log("Respuesta del backend (WhatsApp):", response.data);
-  
+
       const ticketId = response.data.ticketId;
       console.log("Ticket generado:", ticketId);
-  
+
       // Redirigir a WhatsApp
       const message = encodeURIComponent(
         `Hola, tengo una consulta personalizada. Mi ticket es ${ticketId}. Por favor, ayúdenme con más información.`
       );
       const whatsappUrl = `https://wa.me/51921346549?text=${message}`;
       console.log("URL de WhatsApp:", whatsappUrl);
-  
+
       window.open(whatsappUrl, "_blank");
       setTicketId(ticketId);
       setOpenDialog(true);
@@ -207,7 +218,6 @@ const PreguntasPersonalizadas = () => {
       setError("No se pudo enviar la consulta. Intenta de nuevo.");
     }
   };
-  
 
   const handleSubmit = async () => {
     console.log("Iniciando envío del formulario...");
@@ -220,15 +230,17 @@ const PreguntasPersonalizadas = () => {
       );
       return;
     }
-  
+
     if (paymentProof && !questionImage) {
-      console.error("Error: Se adjuntó comprobante, pero falta la imagen de la pregunta.");
+      console.error(
+        "Error: Se adjuntó comprobante, pero falta la imagen de la pregunta."
+      );
       setError(
         "Por favor, adjunta la imagen de la pregunta antes de enviar el comprobante de pago."
       );
       return;
     }
-  
+
     if (!selectedCourse) {
       console.error("Error: No se seleccionó un curso.");
       setError("Por favor, selecciona un curso antes de enviar la consulta.");
@@ -236,8 +248,12 @@ const PreguntasPersonalizadas = () => {
     }
 
     if (!selectedLevel || !schoolName) {
-      console.error("Error: Datos incompletos (nivel escolar o nombre de la escuela).");
-      setError("Por favor, completa el nivel escolar y el nombre de la escuela.");
+      console.error(
+        "Error: Datos incompletos (nivel escolar o nombre de la escuela)."
+      );
+      setError(
+        "Por favor, completa el nivel escolar y el nombre de la escuela."
+      );
       return;
     }
 
@@ -255,7 +271,7 @@ const PreguntasPersonalizadas = () => {
         questionFormData.append("file", questionImage);
 
         const questionUploadResponse = await axios.post(
-          "http://54.165.220.109:3000/api/upload-question",
+          "https://api.master-bikas.com/api/upload-question",
           questionFormData,
           {
             headers: {
@@ -279,7 +295,7 @@ const PreguntasPersonalizadas = () => {
         paymentFormData.append("file", paymentProof);
 
         const paymentUploadResponse = await axios.post(
-          "http://54.165.220.109:3000/api/upload-payment-proof",
+          "https://api.master-bikas.com/api/upload-payment-proof",
           paymentFormData,
           {
             headers: {
@@ -325,7 +341,7 @@ const PreguntasPersonalizadas = () => {
       console.log("Datos enviados al backend (pregunta):", payload);
 
       const response = await axios.post(
-        "http://54.165.220.109:3000/api/pregunta",
+        "https://api.master-bikas.com/api/pregunta",
         payload,
         {
           headers: {
@@ -359,7 +375,7 @@ const PreguntasPersonalizadas = () => {
         </Typography>
         <Typography variant="body1" sx={{ color: "#333", mb: 2 }} gutterBottom>
           ¿No encontraste una pregunta similar a la que buscas? No te preocupes,
-          envíanos tu ejercicio y<br></br>recibirásla solución detallada en un
+          envíanos tu ejercicio y<br></br>recibirás la solución detallada en un
           plazo máximo de 1 día hábil.
         </Typography>
         {error && (
@@ -395,35 +411,40 @@ const PreguntasPersonalizadas = () => {
               disabled
             />
             <FormControl fullWidth sx={{ mb: 3 }}>
-            <Autocomplete
-  options={courses}
-  getOptionLabel={(option) =>
-    typeof option === "string" ? option : option?.COURSE_NAME || ""
-  }
-  value={selectedCourse}
-  onChange={(event, newValue) => {
-    if (typeof newValue === "string") {
-      // El usuario escribió un curso personalizado
-      setSelectedCourse(newValue);
-    } else if (newValue && newValue.COURSE_NAME) {
-      // El usuario seleccionó un curso existente
-      setSelectedCourse(newValue);
-    } else {
-      // Vaciar el valor si el usuario borra el texto
-      setSelectedCourse("");
-    }
-  }}
-  onInputChange={(event, newInputValue) => {
-    // Actualizar el estado mientras el usuario escribe
-    setSelectedCourse(newInputValue);
-  }}
-  renderInput={(params) => (
-    <TextField {...params} label="Selecciona o escribe un curso" variant="outlined" />
-  )}
-  freeSolo
-  fullWidth
-/>
-
+              <Autocomplete
+                options={courses}
+                getOptionLabel={(option) =>
+                  typeof option === "string"
+                    ? option
+                    : option?.COURSE_NAME || ""
+                }
+                value={selectedCourse}
+                onChange={(event, newValue) => {
+                  if (typeof newValue === "string") {
+                    // El usuario escribió un curso personalizado
+                    setSelectedCourse(newValue);
+                  } else if (newValue && newValue.COURSE_NAME) {
+                    // El usuario seleccionó un curso existente
+                    setSelectedCourse(newValue);
+                  } else {
+                    // Vaciar el valor si el usuario borra el texto
+                    setSelectedCourse("");
+                  }
+                }}
+                onInputChange={(event, newInputValue) => {
+                  // Actualizar el estado mientras el usuario escribe
+                  setSelectedCourse(newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Selecciona o escribe un curso"
+                    variant="outlined"
+                  />
+                )}
+                freeSolo
+                fullWidth
+              />
             </FormControl>
 
             <FormControl fullWidth sx={{ mb: 3 }}>
@@ -479,6 +500,7 @@ const PreguntasPersonalizadas = () => {
                 mb: 2,
               }}
             >
+
               <Button
                 variant="outlined"
                 component="label"
@@ -550,7 +572,7 @@ const PreguntasPersonalizadas = () => {
               <Button
                 variant="outlined"
                 component="label"
-                disabled={whatsappOption}
+                disabled={!questionUploaded || whatsappOption} 
                 sx={{
                   mb: 2,
                   bgcolor: paymentUploaded ? "success.main" : "inherit",
@@ -584,6 +606,7 @@ const PreguntasPersonalizadas = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleWhatsAppOption}
+                disabled={!questionUploaded}    
                 sx={{
                   mt: 2,
                   bgcolor: whatsappOption ? "success.main" : "inherit",
